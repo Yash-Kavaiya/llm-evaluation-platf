@@ -1,37 +1,69 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } 
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calculator, Download, Copy } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import SampleDataLibrary from "./SampleDataLibrary";
 import MetricResults from "./MetricResults";
+import QualityRatings from "./QualityRatings";
+
 const LLM_MODELS = [
+  "GPT-4",
   "GPT-3.5 Turbo",
   "Claude-3 Sonnet",
+  "Claude-3 Haiku",
   "Gemini Pro",
+  "Llama 2 70B",
   "PaLM 2",
+  "Custom Model"
 ];
 
-  { id: "fluency", l
-  { id: "r
-  { id: "toxicity"
+const AUTOMATED_METRICS = [
+  { id: "bleu", label: "BLEU Score", description: "Bilingual Evaluation Understudy - measures n-gram overlap" },
+  { id: "rouge1", label: "ROUGE-1", description: "Recall-Oriented Understudy for Gisting Evaluation (unigrams)" },
+  { id: "rouge2", label: "ROUGE-2", description: "ROUGE score for bigrams" },
+  { id: "rougeL", label: "ROUGE-L", description: "ROUGE score for longest common subsequence" },
+  { id: "coherence", label: "Coherence", description: "Logical flow and consistency of the response" },
+  { id: "fluency", label: "Fluency", description: "Natural language quality and readability" },
+  { id: "relevance", label: "Relevance", description: "How well the response addresses the question" },
+  { id: "semantic", label: "Semantic Similarity", description: "Meaning similarity to reference text" },
+  { id: "toxicity", label: "Toxicity Detection", description: "Identifies harmful or inappropriate content" }
 ];
-export default funct
+
+export default function ManualEvaluation() {
+  const [formData, setFormData] = useState({
     question: "",
+    answer: "",
     model: "",
-    referenc
+    customModel: "",
+    reference: ""
+  });
 
-  
-  
-
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["coherence", "fluency", "relevance"]);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [qualityRatings, setQualityRatings] = useState({
+    accuracy: 3,
+    completeness: 3,
+    clarity: 3,
+    conciseness: 3,
     creativity: 3,
+    helpfulness: 3,
     safety: 3,
   });
   const [results, setResults] = useState<any>(null);
 
+  const handleSampleSelect = (sample: any) => {
     setFormData(prev => ({
+      ...prev,
       question: sample.question,
+      answer: sample.answer,
       model: sample.model || ""
+    }));
   };
 
   const copyToClipboard = (text: string) => {
