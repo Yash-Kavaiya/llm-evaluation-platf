@@ -5,9 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useKV } from '@github/spark/hooks';
 import { 
-  ChartBar,
-  ChartLine,
-  ChartPie,
   Calendar,
   Download,
   ArrowClockwise,
@@ -15,6 +12,7 @@ import {
   TrendUp,
   TrendDown
 } from "@phosphor-icons/react";
+import { BarChart3, LineChart } from "lucide-react";
 import { toast } from "sonner";
 
 interface EvaluationRecord {
@@ -578,17 +576,19 @@ function AdvancedAnalytics() {
                           ));
                         })()}
                       </div>
-                    ) : (
-                      <p className="text-muted-foreground">No metric data available. Generate some demo data to see statistics.</p>
-                    )}
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No metric data available. Generate some demo data to see statistics.
                     </div>
-              </Card>
+                  )}
                 </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
   );
-
-
-
-
-
+}
 
 export default AdvancedAnalytics;
