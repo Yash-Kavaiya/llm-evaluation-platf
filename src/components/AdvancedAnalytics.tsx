@@ -15,7 +15,6 @@ import {
   TrendUp,
   TrendDown
 } from "@phosphor-icons/react";
-import { BarChart3, LineChart } from "lucide-react";
 import { toast } from "sonner";
 
 interface EvaluationRecord {
@@ -65,7 +64,7 @@ function AdvancedAnalytics() {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - parseInt(dateRange));
 
-    return (evaluationHistory || []).filter(record => {
+    return evaluationHistory.filter(record => {
       const recordDate = new Date(record.timestamp);
       const isInDateRange = recordDate >= cutoffDate;
       const isSelectedModel = selectedModel === "all" || record.modelName === selectedModel;
@@ -153,11 +152,11 @@ function AdvancedAnalytics() {
 
   // Get unique models and categories
   const uniqueModels = useMemo(() => {
-    return [...new Set((evaluationHistory || []).map(r => r.modelName))];
+    return [...new Set(evaluationHistory.map(r => r.modelName))];
   }, [evaluationHistory]);
 
   const uniqueCategories = useMemo(() => {
-    return [...new Set((evaluationHistory || []).map(r => r.category).filter(Boolean))];
+    return [...new Set(evaluationHistory.map(r => r.category).filter(Boolean))];
   }, [evaluationHistory]);
 
   // Calculate summary statistics
@@ -248,7 +247,7 @@ function AdvancedAnalytics() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ChartBar className="w-5 h-5" />
+            <BarChart3 className="w-5 h-5" />
             Analytics Overview
           </CardTitle>
           <CardDescription>
@@ -321,7 +320,7 @@ function AdvancedAnalytics() {
                     <p className="text-sm text-muted-foreground">Average Score</p>
                     <p className="text-2xl font-bold">{summaryStats.avgScore.toFixed(1)}</p>
                   </div>
-                  <ChartBar className="w-8 h-8 text-muted-foreground" />
+                  <BarChart3 className="w-8 h-8 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
@@ -333,7 +332,7 @@ function AdvancedAnalytics() {
                     <p className="text-sm text-muted-foreground">Top Model</p>
                     <p className="text-lg font-semibold">{summaryStats.topModel || 'N/A'}</p>
                   </div>
-                  <ChartLine className="w-8 h-8 text-muted-foreground" />
+                  <LineChart className="w-8 h-8 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
@@ -579,6 +578,7 @@ function AdvancedAnalytics() {
                           ));
                         })()}
                       </div>
+                    </div>
                   ) : (
                     <p className="text-muted-foreground">No metric data available. Generate some demo data to see statistics.</p>
                   )}
@@ -588,8 +588,15 @@ function AdvancedAnalytics() {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
   );
-}
 
-export default AdvancedAnalytics;
+
+
+
+
+
+
+
+
+
+export default AdvancedAnalytics;
