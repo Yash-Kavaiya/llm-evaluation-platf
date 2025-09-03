@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Download, Play, Pause, RotateCcw } from "@phosphor-icons/react";
+import { Upload, Download, Play, Pause, RotateCcw, FileText } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface CSVData {
@@ -34,6 +34,39 @@ const AUTOMATED_METRICS = [
   { id: "length", label: "Response Length" }
 ];
 
+const CSV_TEMPLATES = {
+  basic: {
+    name: "Basic Template",
+    description: "Simple question and answer format",
+    headers: ["Question", "Answer"],
+    sampleRows: [
+      ["What is machine learning?", "Machine learning is a subset of artificial intelligence that enables computers to learn and improve from experience without being explicitly programmed."],
+      ["Explain photosynthesis", "Photosynthesis is the process by which plants convert sunlight, carbon dioxide, and water into glucose and oxygen using chlorophyll."],
+      ["What causes seasons?", "Seasons are caused by Earth's axial tilt as it orbits the sun, resulting in varying amounts of sunlight reaching different regions throughout the year."]
+    ]
+  },
+  withModel: {
+    name: "With Model Column",
+    description: "Includes model identification for comparison",
+    headers: ["Question", "Answer", "Model"],
+    sampleRows: [
+      ["Write a Python function to reverse a string", "def reverse_string(s): return s[::-1]", "GPT-4"],
+      ["Explain quantum computing", "Quantum computing uses quantum mechanical phenomena like superposition and entanglement to perform calculations.", "Claude-3"],
+      ["What is blockchain?", "Blockchain is a distributed ledger technology that maintains a continuously growing list of records linked using cryptography.", "Gemini-Pro"]
+    ]
+  },
+  comprehensive: {
+    name: "Comprehensive Template",
+    description: "Full format with reference answers and metadata",
+    headers: ["Question", "Answer", "Model", "Reference_Answer", "Category", "Difficulty"],
+    sampleRows: [
+      ["Calculate 15% of 240", "15% of 240 is 36", "GPT-4", "36", "Math", "Easy"],
+      ["Explain the water cycle", "The water cycle involves evaporation, condensation, and precipitation in a continuous process.", "Claude-3", "Water evaporates, forms clouds, and falls as precipitation", "Science", "Medium"],
+      ["Analyze the themes in 1984", "1984 explores totalitarianism, surveillance, truth manipulation, and loss of individual freedom.", "Gemini-Pro", "Themes include government control, surveillance state, and individual vs. authority", "Literature", "Hard"]
+    ]
+  }
+};
+
 export default function BulkEvaluation() {
   const [csvData, setCsvData] = useState<CSVData | null>(null);
   const [columnMapping, setColumnMapping] = useState({
@@ -48,6 +81,26 @@ export default function BulkEvaluation() {
   const [results, setResults] = useState<ProcessingResults | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const downloadTemplate = (templateKey: keyof typeof CSV_TEMPLATES) => {
+    const template = CSV_TEMPLATES[templateKey];
+    const csvContent = [
+      template.headers.join(','),
+      ...template.sampleRows.map(row => 
+        row.map(cell => `"${cell}"`).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `llm-evaluation-template-${templateKey}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success(`${template.name} downloaded successfully`);
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -202,6 +255,51 @@ export default function BulkEvaluation() {
 
   return (
     <div className="space-y-8">
+      {/* CSV Templates */}
+      <Card className="bg-accent/30">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <FileText className="w-5 h-5 text-accent-foreground" />
+            CSV Templates
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Download ready-to-use CSV templates with sample data to get started quickly
+            </p>
+            <div className="grid md:grid-cols-3 gap-4">
+              {Object.entries(CSV_TEMPLATES).map(([key, template]) => (
+                <Card key={key} className="border border-border/50">
+                  <CardContent className="p-4 space-y-3">
+                    <div>
+                      <h4 className="font-medium text-sm">{template.name}</h4>
+                      <p className="text-xs text-muted-foreground">{template.description}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {template.headers.map(header => (
+                        <Badge key={header} variant="outline" className="text-xs">
+                          {header}
+                        </Badge>
+                      ))}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => downloadTemplate(key as keyof typeof CSV_TEMPLATES)}
+                      className="w-full flex items-center gap-2"
+                    >
+                      <Download className="w-3 h-3" />
+                      Download
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* File Upload */}
       <Card>
         <CardHeader>
@@ -216,7 +314,10 @@ export default function BulkEvaluation() {
             <div className="space-y-2">
               <p className="text-lg font-medium">Drop your CSV file here or click to browse</p>
               <p className="text-sm text-muted-foreground">
-                CSV should contain columns for questions and answers
+                Upload a CSV file with your question-answer data for bulk evaluation
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Tip: Use our templates above if you need a starting format
               </p>
             </div>
           </div>
