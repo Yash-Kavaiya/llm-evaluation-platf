@@ -592,4 +592,4 @@ export default function AdvancedAnalytics() {
       </Card>
     </div>
   );
-}}
+}
