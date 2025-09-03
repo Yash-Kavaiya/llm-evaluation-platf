@@ -2,16 +2,24 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Copy, Calculator, Download } from "@p
+import { Copy, Calculator, Download } from "@phosphor-icons/react";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import SampleDataLibrary from "./SampleDataLibrary";
 import MetricResults from "./MetricResults";
 import QualityRatings from "./QualityRatings";
 const LLM_MODELS = [
+  "GPT-4",
   "GPT-3.5 Turbo",
   "Claude-3 Haiku",
   "Llama 2",
+  "Custom Model"
 ];
 const AUTOMATED_METRICS = [
-
+  { id: "coherence", label: "Coherence Score", description: "Logical flow and consistency" },
   { id: "fluency", label: "Fluency Score", description: "Language quality and readability" },
   { id: "relevance", label: "Relevance Score", description: "Response appropriateness" },
   { id: "rouge", label: "ROUGE Scores", description: "Text overlap metrics" },
