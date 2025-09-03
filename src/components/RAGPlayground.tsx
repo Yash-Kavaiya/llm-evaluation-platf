@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,9 +18,16 @@ import {
   CheckCircle, 
   Warning,
   Article,
-  Ranking
+  Ranking,
+  Upload,
+  File,
+  FilePdf,
+  FileText,
+  Trash,
+  Plus
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { useKV } from '@github/spark/hooks';
 
 interface Document {
   id: string;
@@ -28,6 +35,15 @@ interface Document {
   content: string;
   relevance_score: number;
   source: string;
+}
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  content: string;
+  uploadDate: string;
 }
 
 interface RAGResult {
@@ -49,7 +65,106 @@ export default function RAGPlayground() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [ragResult, setRAGResult] = useState<RAGResult | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useKV<UploadedFile[]>("rag-uploaded-files", []);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // File upload handlers
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    
+    try {
+      const newFiles: UploadedFile[] = [];
+      
+      for (const file of files) {
+        // Check file type
+        const allowedTypes = [
+          'text/plain',
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/markdown',
+          'text/csv'
+        ];
+        
+        if (!allowedTypes.includes(file.type) && !file.name.match(/\.(txt|md|pdf|doc|docx|csv)$/i)) {
+          toast.error(`Unsupported file type: ${file.name}`);
+          continue;
+        }
+
+        // Check file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`File too large: ${file.name} (max 10MB)`);
+          continue;
+        }
+
+        let content = '';
+        
+        // Process file based on type
+        if (file.type === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.md') || file.name.endsWith('.csv')) {
+          content = await file.text();
+        } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+          // For PDF files, we'll extract a mock content for demo purposes
+          // In a real implementation, you'd use a PDF parsing library
+          content = `[PDF Content] This is extracted text from the PDF file: ${file.name}. The document contains ${Math.floor(file.size / 1000)} KB of content that would be processed by a PDF parser in a production environment.`;
+        } else if (file.type.includes('word') || file.name.match(/\.(doc|docx)$/i)) {
+          // For Word documents, we'll extract a mock content for demo purposes
+          // In a real implementation, you'd use a document parsing library
+          content = `[Word Document] This is extracted text from the Word document: ${file.name}. The document contains ${Math.floor(file.size / 1000)} KB of content that would be processed by a document parser in a production environment.`;
+        }
+
+        const uploadedFile: UploadedFile = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          content: content,
+          uploadDate: new Date().toISOString()
+        };
+
+        newFiles.push(uploadedFile);
+      }
+
+      if (newFiles.length > 0) {
+        setUploadedFiles(currentFiles => [...currentFiles, ...newFiles]);
+        toast.success(`Successfully uploaded ${newFiles.length} file(s)`);
+      }
+    } catch (error) {
+      console.error('File upload error:', error);
+      toast.error('Failed to upload files');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const removeFile = (fileId: string) => {
+    setUploadedFiles(currentFiles => currentFiles.filter(file => file.id !== fileId));
+    toast.success('File removed from knowledge base');
+  };
+
+  const getFileIcon = (fileName: string, fileType: string) => {
+    if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+      return <FilePdf className="w-4 h-4 text-red-600" />;
+    } else if (fileType.includes('word') || fileName.match(/\.(doc|docx)$/i)) {
+      return <FileText className="w-4 h-4 text-blue-600" />;
+    } else {
+      return <File className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
   // Sample knowledge base documents
   const sampleDocs = [
     {
@@ -84,14 +199,28 @@ export default function RAGPlayground() {
     }
   ];
 
+  // Combine sample docs with uploaded files for retrieval
+  const getAllDocuments = () => {
+    const uploadedDocs = uploadedFiles.map(file => ({
+      id: file.id,
+      title: file.name,
+      content: file.content,
+      source: "Uploaded File"
+    }));
+    return [...sampleDocs, ...uploadedDocs];
+  };
+
   const mockRAGProcess = async () => {
     setIsProcessing(true);
     
     // Simulate retrieval and generation delay
     await new Promise(resolve => setTimeout(resolve, 2500));
     
+    // Get all available documents (sample + uploaded)
+    const allDocs = getAllDocuments();
+    
     // Mock document retrieval based on query similarity
-    const retrievedDocs = sampleDocs
+    const retrievedDocs = allDocs
       .map(doc => ({
         ...doc,
         relevance_score: Math.random() * 0.6 + 0.4 // 0.4-1.0 range
@@ -100,7 +229,7 @@ export default function RAGPlayground() {
       .slice(0, topK);
     
     const mockResult: RAGResult = {
-      answer: `Based on the retrieved context, ${query.toLowerCase().includes('machine learning') ? 'machine learning is a powerful subset of AI that enables systems to learn from data without explicit programming. It uses algorithms to identify patterns and make predictions.' : query.toLowerCase().includes('neural') ? 'neural networks are computational models inspired by the human brain, consisting of interconnected nodes that process information through weighted connections.' : 'the concept you\'re asking about relates to modern AI systems that process and understand information through sophisticated mathematical models and algorithms.'}`,
+      answer: `Based on the retrieved context from ${allDocs.length} documents (including ${uploadedFiles.length} uploaded files), ${query.toLowerCase().includes('machine learning') ? 'machine learning is a powerful subset of AI that enables systems to learn from data without explicit programming. It uses algorithms to identify patterns and make predictions.' : query.toLowerCase().includes('neural') ? 'neural networks are computational models inspired by the human brain, consisting of interconnected nodes that process information through weighted connections.' : 'the concept you\'re asking about relates to modern AI systems that process and understand information through sophisticated mathematical models and algorithms.'}`,
       confidence: 0.87,
       retrieved_docs: retrievedDocs,
       context_relevance: 0.82,
@@ -192,10 +321,78 @@ export default function RAGPlayground() {
               Knowledge Base Context
             </CardTitle>
             <CardDescription>
-              Additional context or knowledge base information
+              Upload documents or provide additional context for RAG processing
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* File Upload Section */}
+            <div className="space-y-3">
+              <Label>Document Upload</Label>
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept=".txt,.pdf,.doc,.docx,.md,.csv"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mb-2">
+                  Upload documents to expand your knowledge base
+                </p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Supports: TXT, PDF, DOC, DOCX, MD, CSV (max 10MB each)
+                </p>
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  {isUploading ? "Uploading..." : "Choose Files"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Uploaded Files List */}
+            {uploadedFiles.length > 0 && (
+              <div className="space-y-2">
+                <Label>Uploaded Documents ({uploadedFiles.length})</Label>
+                <ScrollArea className="h-32 w-full rounded border">
+                  <div className="p-2 space-y-2">
+                    {uploadedFiles.map((file) => (
+                      <div
+                        key={file.id}
+                        className="flex items-center justify-between p-2 bg-muted rounded-md"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {getFileIcon(file.name, file.type)}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{file.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatFileSize(file.size)} • {new Date(file.uploadDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => removeFile(file.id)}
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0"
+                        >
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+
+            <Separator />
+
             <div className="space-y-2">
               <Label htmlFor="context-input">Additional Context (Optional)</Label>
               <Textarea
@@ -203,7 +400,7 @@ export default function RAGPlayground() {
                 placeholder="Provide additional context or domain-specific information..."
                 value={context}
                 onChange={(e) => setContext(e.target.value)}
-                className="min-h-32"
+                className="min-h-20"
               />
             </div>
 
@@ -216,6 +413,11 @@ export default function RAGPlayground() {
                 <Lightning className="w-4 h-4 mr-2" />
                 {isProcessing ? "Processing RAG Pipeline..." : "Run RAG Analysis"}
               </Button>
+              {getAllDocuments().length > 0 && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Knowledge base contains {getAllDocuments().length} documents ({uploadedFiles.length} uploaded)
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
