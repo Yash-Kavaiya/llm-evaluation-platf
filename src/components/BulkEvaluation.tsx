@@ -1,0 +1,463 @@
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Upload, Download, Play, Pause, RotateCcw } from "@phosphor-icons/react";
+import { toast } from "sonner";
+import { useKV } from '@github/spark/hooks';
+
+interface CSVData {
+  headers: string[];
+  rows: string[][];
+}
+
+interface ProcessingResults {
+  totalRows: number;
+  processedRows: number;
+  results: Array<{
+    question: string;
+    answer: string;
+    model?: string;
+    metrics: Record<string, number>;
+    overallScore: number;
+  }>;
+}
+
+const AUTOMATED_METRICS = [
+  { id: "coherence", label: "Coherence Score" },
+  { id: "fluency", label: "Fluency Score" },
+  { id: "relevance", label: "Relevance Score" },
+  { id: "semantic", label: "Semantic Similarity" },
+  { id: "length", label: "Response Length" }
+];
+
+export default function BulkEvaluation() {
+  const [csvData, setCsvData] = useState<CSVData | null>(null);
+  const [columnMapping, setColumnMapping] = useState({
+    question: "",
+    answer: "",
+    model: ""
+  });
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["coherence", "fluency", "relevance"]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [results, setResults] = useKV<ProcessingResults | null>("bulk-evaluation-results", null);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      toast.error("Please upload a CSV file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      const lines = content.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        toast.error("CSV file must have at least a header and one data row");
+        return;
+      }
+
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const rows = lines.slice(1).map(line => 
+        line.split(',').map(cell => cell.trim().replace(/"/g, ''))
+      );
+
+      setCsvData({ headers, rows });
+      setColumnMapping({ question: "", answer: "", model: "" });
+      toast.success(`Loaded ${rows.length} rows from CSV file`);
+    };
+
+    reader.readAsText(file);
+  };
+
+  const handleMetricToggle = (metricId: string) => {
+    setSelectedMetrics(prev => 
+      prev.includes(metricId) 
+        ? prev.filter(id => id !== metricId)
+        : [...prev, metricId]
+    );
+  };
+
+  const startProcessing = async () => {
+    if (!csvData || !columnMapping.question || !columnMapping.answer) {
+      toast.error("Please upload a CSV file and map the required columns");
+      return;
+    }
+
+    if (selectedMetrics.length === 0) {
+      toast.error("Please select at least one metric to calculate");
+      return;
+    }
+
+    setIsProcessing(true);
+    setIsPaused(false);
+    setProgress(0);
+
+    const questionIndex = csvData.headers.indexOf(columnMapping.question);
+    const answerIndex = csvData.headers.indexOf(columnMapping.answer);
+    const modelIndex = columnMapping.model ? csvData.headers.indexOf(columnMapping.model) : -1;
+
+    const processedResults: ProcessingResults = {
+      totalRows: csvData.rows.length,
+      processedRows: 0,
+      results: []
+    };
+
+    try {
+      for (let i = 0; i < csvData.rows.length; i++) {
+        if (isPaused) {
+          toast.info("Processing paused");
+          break;
+        }
+
+        const row = csvData.rows[i];
+        const question = row[questionIndex] || "";
+        const answer = row[answerIndex] || "";
+        const model = modelIndex >= 0 ? row[modelIndex] : undefined;
+
+        if (!question.trim() || !answer.trim()) {
+          continue;
+        }
+
+        // Simulate metric calculations
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const metrics = selectedMetrics.reduce((acc, metric) => {
+          acc[metric] = Math.random() * 0.4 + 0.6; // Random score between 0.6-1.0
+          return acc;
+        }, {} as Record<string, number>);
+
+        const overallScore = Object.values(metrics).reduce((sum, score) => sum + score, 0) / Object.values(metrics).length;
+
+        processedResults.results.push({
+          question,
+          answer,
+          model,
+          metrics,
+          overallScore
+        });
+
+        processedResults.processedRows = i + 1;
+        setProgress(((i + 1) / csvData.rows.length) * 100);
+        setResults({ ...processedResults });
+      }
+
+      if (!isPaused) {
+        toast.success(`Processing completed! Evaluated ${processedResults.results.length} entries`);
+      }
+    } catch (error) {
+      toast.error("Processing failed");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const pauseProcessing = () => {
+    setIsPaused(true);
+    setIsProcessing(false);
+  };
+
+  const resetProcessing = () => {
+    setIsProcessing(false);
+    setIsPaused(false);
+    setProgress(0);
+    setResults(null);
+  };
+
+  const exportResults = () => {
+    if (!results) return;
+
+    const csvContent = [
+      ['Question', 'Answer', 'Model', ...selectedMetrics, 'Overall Score'].join(','),
+      ...results.results.map(result => [
+        `"${result.question}"`,
+        `"${result.answer}"`, 
+        result.model || "N/A",
+        ...selectedMetrics.map(metric => result.metrics[metric]?.toFixed(3) || "N/A"),
+        result.overallScore.toFixed(3)
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bulk-evaluation-results-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success("Results exported successfully");
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* File Upload */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">CSV File Upload</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div 
+            className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <div className="space-y-2">
+              <p className="text-lg font-medium">Drop your CSV file here or click to browse</p>
+              <p className="text-sm text-muted-foreground">
+                CSV should contain columns for questions and answers
+              </p>
+            </div>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          
+          {csvData && (
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">{csvData.rows.length} rows</Badge>
+                <Badge variant="outline">{csvData.headers.length} columns</Badge>
+              </div>
+              
+              {/* Preview */}
+              <div className="border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {csvData.headers.slice(0, 5).map((header, i) => (
+                        <TableHead key={i}>{header}</TableHead>
+                      ))}
+                      {csvData.headers.length > 5 && <TableHead>...</TableHead>}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {csvData.rows.slice(0, 3).map((row, i) => (
+                      <TableRow key={i}>
+                        {row.slice(0, 5).map((cell, j) => (
+                          <TableCell key={j} className="max-w-[200px] truncate">
+                            {cell}
+                          </TableCell>
+                        ))}
+                        {row.length > 5 && <TableCell>...</TableCell>}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {csvData && (
+        <>
+          {/* Column Mapping */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Column Mapping</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Question Column *</label>
+                  <Select value={columnMapping.question} onValueChange={(value) => 
+                    setColumnMapping(prev => ({ ...prev, question: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {csvData.headers.map(header => (
+                        <SelectItem key={header} value={header}>{header}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Answer Column *</label>
+                  <Select value={columnMapping.answer} onValueChange={(value) => 
+                    setColumnMapping(prev => ({ ...prev, answer: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {csvData.headers.map(header => (
+                        <SelectItem key={header} value={header}>{header}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Model Column (Optional)</label>
+                  <Select value={columnMapping.model} onValueChange={(value) => 
+                    setColumnMapping(prev => ({ ...prev, model: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {csvData.headers.map(header => (
+                        <SelectItem key={header} value={header}>{header}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Metric Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Metric Selection</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {AUTOMATED_METRICS.map(metric => (
+                  <div key={metric.id} className="flex items-center gap-3">
+                    <Checkbox
+                      id={`bulk-${metric.id}`}
+                      checked={selectedMetrics.includes(metric.id)}
+                      onCheckedChange={() => handleMetricToggle(metric.id)}
+                    />
+                    <label htmlFor={`bulk-${metric.id}`} className="text-sm font-medium">
+                      {metric.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Processing Controls */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Processing</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {(isProcessing || results) && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span>{Math.round(progress)}%</span>
+                  </div>
+                  <Progress value={progress} />
+                  {results && (
+                    <p className="text-sm text-muted-foreground">
+                      Processed {results.processedRows} of {results.totalRows} rows
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-4">
+                {!isProcessing && !results && (
+                  <Button 
+                    onClick={startProcessing}
+                    disabled={!columnMapping.question || !columnMapping.answer || selectedMetrics.length === 0}
+                    className="flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4" />
+                    Start Processing
+                  </Button>
+                )}
+
+                {isProcessing && (
+                  <Button onClick={pauseProcessing} variant="outline" className="flex items-center gap-2">
+                    <Pause className="w-4 h-4" />
+                    Pause
+                  </Button>
+                )}
+
+                {(results || isPaused) && (
+                  <Button onClick={resetProcessing} variant="outline" className="flex items-center gap-2">
+                    <RotateCcw className="w-4 h-4" />
+                    Reset
+                  </Button>
+                )}
+
+                {results && results.results.length > 0 && (
+                  <Button onClick={exportResults} className="flex items-center gap-2">
+                    <Download className="w-4 h-4" />
+                    Export Results
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Results Preview */}
+          {results && results.results.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Results Preview</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Showing first 10 results. Export for complete data.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Question</TableHead>
+                        <TableHead>Answer</TableHead>
+                        {columnMapping.model && <TableHead>Model</TableHead>}
+                        <TableHead>Overall Score</TableHead>
+                        {selectedMetrics.map(metric => (
+                          <TableHead key={metric}>
+                            {AUTOMATED_METRICS.find(m => m.id === metric)?.label}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {results.results.slice(0, 10).map((result, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="max-w-[200px] truncate">{result.question}</TableCell>
+                          <TableCell className="max-w-[200px] truncate">{result.answer}</TableCell>
+                          {columnMapping.model && (
+                            <TableCell>{result.model || "N/A"}</TableCell>
+                          )}
+                          <TableCell className="font-medium">
+                            {(result.overallScore * 100).toFixed(1)}%
+                          </TableCell>
+                          {selectedMetrics.map(metric => (
+                            <TableCell key={metric}>
+                              {(result.metrics[metric] * 100).toFixed(1)}%
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

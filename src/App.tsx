@@ -1,5 +1,76 @@
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartBar, Upload } from "@phosphor-icons/react";
+import { Toaster } from "@/components/ui/sonner";
+import ManualEvaluation from "@/components/ManualEvaluation";
+import BulkEvaluation from "@/components/BulkEvaluation";
+
 function App() {
-    return <div></div>
+  const [activeTab, setActiveTab] = useState("manual");
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-3">
+            <ChartBar className="w-8 h-8 text-primary" weight="bold" />
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">LLM Evaluation Platform</h1>
+              <p className="text-sm text-muted-foreground">Comprehensive assessment of language model outputs</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="manual" className="flex items-center gap-2">
+              <ChartBar className="w-4 h-4" />
+              Manual Evaluation
+            </TabsTrigger>
+            <TabsTrigger value="bulk" className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              Bulk Processing
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="manual" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Single Entry Evaluation</CardTitle>
+                <CardDescription>
+                  Evaluate individual model outputs with comprehensive metrics and manual scoring
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ManualEvaluation />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="bulk" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Bulk CSV Processing</CardTitle>
+                <CardDescription>
+                  Upload and evaluate multiple prompt-response pairs for comprehensive analysis
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BulkEvaluation />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
+      
+      <Toaster />
+    </div>
+  );
 }
 
-export default App
+export default App;
