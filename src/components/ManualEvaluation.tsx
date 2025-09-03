@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Download, Copy } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import SampleDataLibrary from "./SampleDataLibrary";
+import { useEvaluationTracking } from "@/hooks/useEvaluationTracking";
 
 const MODELS = [
   { id: "gpt-4", name: "GPT-4" },
@@ -30,6 +31,8 @@ const METRICS = [
 ];
 
 export default function ManualEvaluation() {
+  const { addEvaluation } = useEvaluationTracking();
+  
   const [formData, setFormData] = useState({
     question: "",
     answer: "",
@@ -110,7 +113,7 @@ export default function ManualEvaluation() {
         sum + rating, 0
       ) / Object.keys(qualityRatings).length;
 
-      setResults({
+      const resultData = {
         automatic: automaticMetrics,
         quality: qualityScore,
         qualityBreakdown: qualityRatings,
@@ -119,6 +122,31 @@ export default function ManualEvaluation() {
           questionLength: formData.question.length,
           answerLength: formData.answer.length,
           timestamp: new Date().toISOString()
+        }
+      };
+
+      setResults(resultData);
+
+      // Track evaluation for analytics
+      const modelName = formData.model === "custom" ? formData.customModel : MODELS.find(m => m.id === formData.model)?.name || formData.model;
+      
+      addEvaluation({
+        modelName,
+        prompt: formData.question,
+        response: formData.answer,
+        metrics: {
+          relevance: qualityRatings.helpfulness * 10 / 5, // Convert 1-5 scale to 1-10
+          accuracy: qualityRatings.accuracy * 10 / 5,
+          coherence: qualityRatings.clarity * 10 / 5,
+          helpfulness: qualityRatings.helpfulness * 10 / 5,
+          harmlessness: qualityRatings.safety * 10 / 5
+        },
+        overallScore: qualityScore * 10 / 5, // Convert 1-5 scale to 1-10
+        evaluationType: 'manual',
+        metadata: {
+          automaticMetrics,
+          qualityBreakdown: qualityRatings,
+          selectedMetrics
         }
       });
 
