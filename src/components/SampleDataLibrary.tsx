@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -138,142 +138,147 @@ export default function SampleDataLibrary({ onSampleSelect }: SampleDataLibraryP
             Explore diverse sample questions and answers across different domains and difficulty levels
           </p>
           
-          {categories.map(category => {
-            const categorySamples = EXTENDED_SAMPLES.filter(s => s.category === category);
-            return (
-              <div key={category} className="space-y-2">
-                <div className="flex items-center gap-2">
-                  {getCategoryIcon(category)}
-                  <h4 className="font-medium text-sm">{category}</h4>
-                  <Badge variant="outline" className="text-xs">
-                    {categorySamples.length} samples
-                  </Badge>
-                </div>
-                
-                <div className="grid gap-2 ml-6">
-                  {categorySamples.map((sample, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 border rounded-lg bg-background/50">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{sample.description}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge className={`text-xs ${getDifficultyColor(sample.difficulty)}`}>
-                            {sample.difficulty}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground truncate">
-                            {sample.question.slice(0, 60)}...
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-1 ml-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedSample(sample)}
-                              className="h-6 w-6 p-0"
-                            >
-                              <FileText className="w-3 h-3" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle className="flex items-center gap-2">
-                                {getCategoryIcon(sample.category)}
-                                {sample.category} Sample
-                              </DialogTitle>
-                              <DialogDescription>
-                                {sample.description} • Difficulty: {sample.difficulty}
-                              </DialogDescription>
-                            </DialogHeader>
-                            
-                            <div className="space-y-4">
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-sm font-medium">Question</Label>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => copyToClipboard(sample.question, "Question")}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    <Copy className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                                <Textarea
-                                  value={sample.question}
-                                  readOnly
-                                  className="min-h-[80px] resize-none"
-                                />
-                              </div>
-                              
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-sm font-medium">Answer</Label>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => copyToClipboard(sample.answer, "Answer")}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    <Copy className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                                <Textarea
-                                  value={sample.answer}
-                                  readOnly
-                                  className="min-h-[200px] resize-none font-mono text-xs"
-                                />
-                              </div>
-                              
-                              {sample.reference && (
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <Label className="text-sm font-medium">Reference Answer</Label>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => copyToClipboard(sample.reference!, "Reference")}
-                                      className="h-6 w-6 p-0"
-                                    >
-                                      <Copy className="w-3 h-3" />
+          <Accordion type="multiple" className="w-full">
+            {categories.map((category, categoryIndex) => {
+              const categorySamples = EXTENDED_SAMPLES.filter(s => s.category === category);
+              return (
+                <AccordionItem key={category} value={`category-${categoryIndex}`}>
+                  <AccordionTrigger className="hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      {getCategoryIcon(category)}
+                      <span className="font-medium">{category}</span>
+                      <Badge variant="outline" className="text-xs ml-2">
+                        {categorySamples.length} samples
+                      </Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid gap-3 pt-2">
+                      {categorySamples.map((sample, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 border rounded-lg bg-background/50 hover:bg-background/70 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium mb-1">{sample.description}</p>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge className={`text-xs ${getDifficultyColor(sample.difficulty)}`}>
+                                {sample.difficulty}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                              {sample.question}
+                            </p>
+                          </div>
+                          
+                          <div className="flex gap-2 ml-3">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setSelectedSample(sample)}
+                                  className="h-8 w-8 p-0"
+                                  title="Preview sample"
+                                >
+                                  <FileText className="w-4 h-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle className="flex items-center gap-2">
+                                    {getCategoryIcon(sample.category)}
+                                    {sample.category} Sample
+                                  </DialogTitle>
+                                  <DialogDescription>
+                                    {sample.description} • Difficulty: {sample.difficulty}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                
+                                <div className="space-y-4">
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <Label className="text-sm font-medium">Question</Label>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => copyToClipboard(sample.question, "Question")}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                    <Textarea
+                                      value={sample.question}
+                                      readOnly
+                                      className="min-h-[80px] resize-none"
+                                    />
+                                  </div>
+                                  
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <Label className="text-sm font-medium">Answer</Label>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => copyToClipboard(sample.answer, "Answer")}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                    <Textarea
+                                      value={sample.answer}
+                                      readOnly
+                                      className="min-h-[200px] resize-none font-mono text-xs"
+                                    />
+                                  </div>
+                                  
+                                  {sample.reference && (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center justify-between">
+                                        <Label className="text-sm font-medium">Reference Answer</Label>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => copyToClipboard(sample.reference!, "Reference")}
+                                          className="h-6 w-6 p-0"
+                                        >
+                                          <Copy className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                      <Textarea
+                                        value={sample.reference}
+                                        readOnly
+                                        className="min-h-[100px] resize-none font-mono text-xs"
+                                      />
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex gap-2 pt-4">
+                                    <Button onClick={() => loadSample(sample)} className="flex-1">
+                                      Load into Evaluation Form
                                     </Button>
                                   </div>
-                                  <Textarea
-                                    value={sample.reference}
-                                    readOnly
-                                    className="min-h-[100px] resize-none font-mono text-xs"
-                                  />
                                 </div>
-                              )}
-                              
-                              <div className="flex gap-2 pt-4">
-                                <Button onClick={() => loadSample(sample)} className="flex-1">
-                                  Load into Evaluation Form
-                                </Button>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => loadSample(sample)}
-                          className="h-6 w-6 p-0"
-                        >
-                          <Folder className="w-3 h-3" />
-                        </Button>
-                      </div>
+                              </DialogContent>
+                            </Dialog>
+                            
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => loadSample(sample)}
+                              className="h-8 px-3"
+                              title="Load sample data"
+                            >
+                              Load
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                
-                {category !== categories[categories.length - 1] && <Separator className="my-3" />}
-              </div>
-            );
-          })}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         </div>
       </CardContent>
     </Card>
