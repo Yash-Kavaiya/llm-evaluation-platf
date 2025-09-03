@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { useKV } from '@github/spark/hooks';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription,
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,12 +17,26 @@ import {
   RefreshCw,
   Target,
   Zap,
-  Award,
-  Database
+  Award
 } from "@phosphor-icons/react";
-import { useDemoDataGenerator } from "@/hooks/useDemoDataGenerator";
-import { EvaluationRecord } from "@/hooks/useEvaluationTracking";
-import { toast } from "sonner";
+
+interface EvaluationRecord {
+  id: string;
+  timestamp: number;
+  modelName: string;
+  prompt: string;
+  response: string;
+  metrics: {
+    relevance: number;
+    accuracy: number;
+    coherence: number;
+    helpfulness: number;
+    harmlessness: number;
+  };
+  overallScore: number;
+  category?: string;
+  evaluationType: 'manual' | 'bulk' | 'rag' | 'responsible';
+}
 
 interface TrendData {
   date: string;
@@ -47,22 +61,21 @@ interface ModelComparison {
 
 export default function AdvancedAnalytics() {
   const [evaluationHistory] = useKV<EvaluationRecord[]>("evaluation-history", []);
-  const { generateDemoDataset, hasDemoData, totalEvaluations } = useDemoDataGenerator();
   const [selectedTimeRange, setSelectedTimeRange] = useState("30");
-  const [selectedModel, setSelectedModel] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [activeMetric, setActiveMetric] = useState("overallScore");
+  }, [evaluationHistory, selectedTimeRange, selectedModel, s
+  // Calculate trend data for charts
+    const days = parseInt(selectedTimeRange);
 
-  // Filter data based on selections
-  const filteredData = useMemo(() => {
-    const now = Date.now();
-    const timeRangeMs = parseInt(selectedTimeRange) * 24 * 60 * 60 * 1000;
-    const cutoffTime = now - timeRangeMs;
+    for (let i = 0; i < days; i++) {
+      date.setDate(date.getDate() - i)
+      dailyData[dateKey] = 
 
-    return evaluationHistory.filter(record => {
-      const timeMatch = record.timestamp >= cutoffTime;
-      const modelMatch = selectedModel === "all" || record.modelName === selectedModel;
-      const categoryMatch = selectedCategory === "all" || record.category === selectedCategory;
+    filteredData.forEach(record => {
+
+        dailyData[recordDate].count++;
+    });
+    // Convert to trend format
+      .map(([date, data]) => ({
       
       return timeMatch && modelMatch && categoryMatch;
     });
@@ -191,203 +204,172 @@ export default function AdvancedAnalytics() {
     return {
       totalEvaluations: filteredData.length,
       avgScore,
-      topModel,
-      improvementRate
-    };
-  }, [filteredData, modelComparisons]);
+    toast.succe
 
-  const exportData = () => {
-    const csvContent = [
-      ['Model', 'Date', 'Score', 'Relevance', 'Accuracy', 'Coherence', 'Helpfulness', 'Harmlessness'],
-      ...filteredData.map(record => [
-        record.modelName,
-        new Date(record.timestamp).toISOString().split('T')[0],
-        record.overallScore.toFixed(2),
-        record.metrics.relevance.toFixed(2),
-        record.metrics.accuracy.toFixed(2),
-        record.metrics.coherence.toFixed(2),
-        record.metrics.helpfulness.toFixed(2),
-        record.metrics.harmlessness.toFixed(2)
-      ])
-    ].map(row => row.join(',')).join('\n');
+    <d
+      {evaluationHistory.length === 0 &
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `evaluation-analytics-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const generateDemoData = () => {
-    const count = generateDemoDataset(75);
-    toast.success(`Generated ${count} demo evaluations`);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Empty State */}
-      {evaluationHistory.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <BarChart3 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Evaluation Data</h3>
-            <p className="text-muted-foreground mb-6">
-              Start by performing evaluations in other tabs, or generate demo data to explore the analytics features.
-            </p>
+            <h3 className="t
+              Start by p
             <Button onClick={generateDemoData}>
-              <Database className="w-4 h-4 mr-2" />
               Generate Demo Data
-            </Button>
           </CardContent>
-        </Card>
       )}
-
       {/* Main Dashboard */}
-      {evaluationHistory.length > 0 && (
         <>
-          {/* Controls */}
-          <div className="flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex flex-wrap gap-3">
-          <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
-            <SelectTrigger className="w-[140px]">
-              <Calendar className="w-4 h-4 mr-2" />
-              <SelectValue />
+          <div className="flex flex-wrap ga
+          <Select value={selectedTimeRange} 
+              <Calendar className="w-4 h-4 mr-
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 90 days</SelectItem>
-              <SelectItem value="365">Last year</SelectItem>
-            </SelectContent>
-          </Select>
+        
+              <SelectItem value="90">Last 9
 
-          <Select value={selectedModel} onValueChange={setSelectedModel}>
-            <SelectTrigger className="w-[160px]">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="All models" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All models</SelectItem>
+
+            <SelectTrigger className="w-[1
+              <SelectValue placeholder="Al
+            <Sele
               {uniqueModels.map(model => (
-                <SelectItem key={model} value={model}>{model}</SelectItem>
-              ))}
-            </SelectContent>
+              
           </Select>
+    
 
-          {uniqueCategories.length > 0 && (
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="All categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
-                {uniqueCategories.map(category => (
-                  <SelectItem key={category} value={category}>{category}</SelectItem>
-                ))}
+          
+                <SelectItem val
+                  <Sel
               </SelectContent>
-            </Select>
           )}
-        </div>
 
-        <div className="flex gap-2">
-          {!hasDemoData && totalEvaluations === 0 && (
-            <Button variant="secondary" size="sm" onClick={generateDemoData}>
+          {!hasDemoData && totalEvaluations === 0
               <Database className="w-4 h-4 mr-2" />
-              Generate Demo Data
             </Button>
-          )}
-          <Button variant="outline" size="sm" onClick={exportData}>
-            <Download className="w-4 h-4 mr-2" />
+          <Button variant="o
             Export
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-            <RefreshCw className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={() =>
             Refresh
-          </Button>
         </div>
-      </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Evaluations</p>
-                <p className="text-3xl font-bold">{summaryStats.totalEvaluations}</p>
-              </div>
-              <BarChart3 className="w-8 h-8 text-primary" />
-            </div>
+      <div className="grid g
+          <CardCont
+
+                <p className="text-3xl font-bold">{summaryStats.totalEval
+              <BarChart3 className="w-8 h-8 text-
           </CardContent>
-        </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent class
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Average Score</p>
-                <p className="text-3xl font-bold">{summaryStats.avgScore.toFixed(1)}</p>
-              </div>
-              <Target className="w-8 h-8 text-accent" />
-            </div>
+                <p className="text-3xl font-bold">{summarySta
+              <Target className="w-8 h-8 t
           </CardContent>
-        </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent class
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Top Model</p>
-                <p className="text-lg font-bold truncate">{summaryStats.topModel}</p>
-              </div>
-              <Award className="w-8 h-8 text-secondary" />
-            </div>
+
+              <Award className="w-8 h-8 tex
           </CardContent>
-        </Card>
 
-        <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Improvement</p>
-                <div className="flex items-center gap-1">
-                  <p className="text-2xl font-bold">
-                    {summaryStats.improvementRate > 0 ? '+' : ''}{summaryStats.improvementRate.toFixed(1)}%
-                  </p>
-                  {summaryStats.improvementRate > 0 ? (
-                    <TrendUp className="w-5 h-5 text-green-500" />
+                <div classNam
+                    {summaryStats.improvementRate > 0 ? '+' : ''}{s
+                  {summaryStats.improvementRate > 0
                   ) : summaryStats.improvementRate < 0 ? (
-                    <TrendDown className="w-5 h-5 text-red-500" />
-                  ) : (
-                    <Zap className="w-5 h-5 text-muted-foreground" />
+                  )
                   )}
-                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+          </
       </div>
 
-      {/* Analytics Tabs */}
-      <Tabs defaultValue="trends" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="trends">
+        <TabsList className="grid w-
             <LineChart className="w-4 h-4 mr-2" />
-            Trends
           </TabsTrigger>
-          <TabsTrigger value="models">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Models
-          </TabsTrigger>
-          <TabsTrigger value="metrics">
+            <BarCh
+          </TabsTri
             <PieChart className="w-4 h-4 mr-2" />
-            Metrics
           </TabsTrigger>
-        </TabsList>
 
-        <TabsContent value="trends" className="space-y-6">
+          <Card>
+              
+            
+
+              <div classNam
+                  <div className="grid gap-4">
+              
+                        <span>Daily Ave
+                      </div>
+                   
+                            <div 
+                              style={{ height: `${(day.score / 10) * 100}%` }}
+                    
+                            </div>
+                  
+                        
+               
+
+              
+                        <span>Daily Eva
+                      </div>
+                   
+                          return (
+                              <div 
+                    
+                              <div className="text-xs fo
+                  
+                        
+               
+
+              
+                  </div>
+              </div>
+          </Card>
+
+          <Card>
+              <CardT
+                Compare performance metrics across differe
+            </Card
+              <div class
+               
+
+              
+                          </Badge>
+                          <Badge variant="outline">
+                   
+                        <div className="flex items-center gap-2">
+                            {model.avgScore.toFixed(1)}
+                          {model.trend !== 'stable' 
+                              {model.trend === 'up' ? (
+                      
+                              )}
+                                {model.trendPercentage.toFixed(1)}
+                            </div>
+                        </div>
+                      
+                        {Object.entries(model.metrics).map(([metric, 
+                    
+                      
+                    
+                  
+                        
+               
+            
+
+                  <div class
+                  </div>
+              </div>
+          </Card>
+
+          <Card>
+              <CardTitle
+                Analyze the distributi
+            </CardHeader>
+              <div
+                <Select 
+                    <SelectValue />
+                  <SelectContent>
+                   
+                    <Sel
+                   
+
+                {filteredData.length > 0 ? (
           <Card>
             <CardHeader>
               <CardTitle>Score Trends Over Time</CardTitle>
@@ -554,6 +536,88 @@ export default function AdvancedAnalytics() {
 
                 {filteredData.length > 0 ? (
                   <div className="space-y-4">
+                    {/* Distribution visualization */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Score Distribution</h4>
+                      <div className="grid grid-cols-10 gap-1 h-32">
+                        {Array.from({ length: 10 }, (_, i) => {
+                          const rangeStart = i;
+                          const rangeEnd = i + 1;
+                          const count = filteredData.filter(record => {
+                            const value = activeMetric === 'overallScore' 
+                              ? record.overallScore 
+                              : record.metrics[activeMetric as keyof typeof record.metrics];
+                            return value >= rangeStart && value < rangeEnd;
+                          }).length;
+                          const maxCount = Math.max(...Array.from({ length: 10 }, (_, j) => {
+                            const rStart = j;
+                            const rEnd = j + 1;
+                            return filteredData.filter(record => {
+                              const value = activeMetric === 'overallScore' 
+                                ? record.overallScore 
+                                : record.metrics[activeMetric as keyof typeof record.metrics];
+                              return value >= rStart && value < rEnd;
+                            }).length;
+                          }));
+
+                          return (
+                            <div key={i} className="flex flex-col justify-end items-center">
+                              <div 
+                                className="w-full bg-secondary rounded-t-sm min-h-[4px]"
+                                style={{ height: maxCount > 0 ? `${(count / maxCount) * 100}%` : '4px' }}
+                              />
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {rangeStart}
+                              </div>
+                              <div className="text-xs font-medium">
+                                {count}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Summary statistics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {(() => {
+                        const values = filteredData.map(record => 
+                          activeMetric === 'overallScore' 
+                            ? record.overallScore 
+                            : record.metrics[activeMetric as keyof typeof record.metrics]
+                        );
+                        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+                        const min = Math.min(...values);
+                        const max = Math.max(...values);
+                        const median = values.sort((a, b) => a - b)[Math.floor(values.length / 2)];
+
+                        return [
+                          { label: 'Average', value: avg.toFixed(2) },
+                          { label: 'Median', value: median.toFixed(2) },
+                          { label: 'Min', value: min.toFixed(2) },
+                          { label: 'Max', value: max.toFixed(2) }
+                        ].map(stat => (
+                          <div key={stat.label} className="text-center p-3 border rounded-lg">
+                            <p className="text-sm text-muted-foreground">{stat.label}</p>
+                            <p className="text-xl font-bold">{stat.value}</p>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No metric data available for analysis
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}                  <div className="space-y-4">
                     {/* Distribution visualization */}
                     <div className="space-y-2">
                       <h4 className="font-medium">Score Distribution</h4>
