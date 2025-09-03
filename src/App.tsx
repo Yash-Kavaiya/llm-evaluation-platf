@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass, TrendUp, GithubLogo, LinkedinLogo, TwitterLogo, Article } from "@phosphor-icons/react";
+import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass, GithubLogo, LinkedinLogo, TwitterLogo, Article } from "@phosphor-icons/react";
 import { Toaster } from "@/components/ui/sonner";
 import ManualEvaluation from "@/components/ManualEvaluation";
 import BulkEvaluation from "@/components/BulkEvaluation";
 import CustomMetricBuilder from "@/components/CustomMetricBuilder";
 import ResponsibleAI from "@/components/ResponsibleAI";
 import RAGPlayground from "@/components/RAGPlayground";
-import AdvancedAnalytics from "@/components/AdvancedAnalytics";
 
 function App() {
   const [activeTab, setActiveTab] = useState("manual");
@@ -73,7 +72,7 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-5xl grid-cols-6">
+          <TabsList className="grid w-full max-w-4xl grid-cols-5">
             <TabsTrigger value="manual" className="flex items-center gap-2">
               <ChartBar className="w-4 h-4" />
               Manual Evaluation
@@ -93,10 +92,6 @@ function App() {
             <TabsTrigger value="rag" className="flex items-center gap-2">
               <MagnifyingGlass className="w-4 h-4" />
               RAG Playground
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <TrendUp className="w-4 h-4" />
-              Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -166,20 +161,6 @@ function App() {
               </CardHeader>
               <CardContent>
                 <RAGPlayground />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Advanced Analytics Dashboard</CardTitle>
-                <CardDescription>
-                  Comprehensive insights into evaluation trends, model performance comparisons, and historical tracking
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AdvancedAnalytics />
               </CardContent>
             </Card>
           </TabsContent>
