@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass, GithubLogo, LinkedinLogo } from "@phosphor-icons/react";
+import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass, GithubLogo, LinkedinLogo, TwitterLogo, Medium } from "@phosphor-icons/react";
 import { Toaster } from "@/components/ui/sonner";
 import ManualEvaluation from "@/components/ManualEvaluation";
 import BulkEvaluation from "@/components/BulkEvaluation";
@@ -45,6 +45,24 @@ function App() {
                 title="LinkedIn Profile"
               >
                 <LinkedinLogo className="w-5 h-5 text-secondary-foreground" />
+              </a>
+              <a 
+                href="https://x.com/Yash_Kavaiya_" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                title="Twitter Profile"
+              >
+                <TwitterLogo className="w-5 h-5 text-secondary-foreground" />
+              </a>
+              <a 
+                href="https://medium.com/@yash.kavaiya3" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                title="Medium Articles"
+              >
+                <Medium className="w-5 h-5 text-secondary-foreground" />
               </a>
             </div>
           </div>
