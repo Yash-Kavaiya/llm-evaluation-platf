@@ -578,14 +578,12 @@ function AdvancedAnalytics() {
                           ));
                         })()}
                       </div>
-                  ) : (
+                      <
                       <p className="text-muted-foreground">No metric data available. Generate some demo data to see statistics.</p>
                   )}
                     </div>
-                  )}
-                </CardContent>
               </Card>
-      </Card>
+                </CardContent>
   );
 
 
