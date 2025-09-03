@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Copy, Calculator, Download } from "@phosphor-icons/react";
-import { Select, SelectContent, SelectItem, Se
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import SampleDataLibrary from "./SampleDataLibrary";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import SampleDataLibrary from "./SampleDataLibrary";
@@ -17,7 +17,7 @@ const LLM_MODELS = [
   "Llama 2",
 ];
 const AUTOMATED_METRICS = [
-
+  { id: "coherence", label: "Coherence Score", description: "Logical flow and consistency" },
   { id: "fluency", label: "Fluency Score", description: "Language quality and readability" },
   { id: "relevance", label: "Relevance Score", description: "Response appropriateness" },
   { id: "rouge", label: "ROUGE Scores", description: "Text overlap metrics" },
