@@ -1,121 +1,129 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator
-import { Calculator, Download, Copy } from "@phosphor-icons/react";
-import MetricResults from "./MetricResults";
-import SampleDataLibrary from "./SampleDataLibrary";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, Download, Lightbulb, Copy } from "@phosphor-icons/react";
+import { Calculator, Download, Copy } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import MetricResults from "./MetricResults";
 import QualityRatings from "./QualityRatings";
+import SampleDataLibrary from "./SampleDataLibrary";
 
 const LLM_MODELS = [
-  { id: "b
-  { id: "rouge2", l
-  { id: "perplexit
-  { id: "fluency", l
-  { id: "semantic",
+  "GPT-4", "GPT-3.5", "Claude-3", "Claude-2", "Gemini Pro", "Llama-2", "Llama-3", "Mistral", "Custom"
 ];
 
-export default f
-    question: "
+const AUTOMATED_METRICS = [
+  { id: "bleu", label: "BLEU Score", description: "Measures n-gram overlap with reference text" },
+  { id: "rouge1", label: "ROUGE-1", description: "Unigram overlap between generated and reference text" },
+  { id: "rouge2", label: "ROUGE-2", description: "Bigram overlap between generated and reference text" },
+  { id: "rougeL", label: "ROUGE-L", description: "Longest common subsequence based metric" },
+  { id: "perplexity", label: "Perplexity", description: "Measures how well the model predicts the text" },
+  { id: "coherence", label: "Coherence Score", description: "Evaluates logical flow and consistency" },
+  { id: "fluency", label: "Fluency Score", description: "Assesses grammatical correctness and readability" },
+  { id: "relevance", label: "Relevance Score", description: "Measures how well response addresses the prompt" },
+  { id: "semantic", label: "Semantic Similarity", description: "Computes meaning similarity using embeddings" },
+  { id: "length", label: "Response Length", description: "Token count and character length analysis" }
+];
+
+export default function ManualEvaluation() {
+  const [formData, setFormData] = useState({
+    question: "",
+    answer: "",
     model: "",
-    referenceAnswer
+    customModel: "",
+    referenceAnswer: ""
+  });
 
-  
-
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["coherence", "fluency", "relevance"]);
+  const [qualityRatings, setQualityRatings] = useState({
     accuracy: 3,
+    completeness: 3,
     clarity: 3,
+    conciseness: 3,
     creativity: 3,
+    helpfulness: 3,
     safety: 3,
+    factualGrounding: 3
   });
   const [results, setResults] = useState<any>(null);
-
-
-    setFormData(prev => ({
-      question: sample.question,
-      referenceAnswer: sample.reference || "",
-  
-
-    navigator.clipboard.writeText(text);
-  };
-  const handleMet
-    answer: "",
-        : [...
-  };
-  const calculateMetric
-  });
-
-    setIsCalculating(true);
-      // Simulate metric calculations
-  ]);
-
-            score: Math.random() * 0.4 + 0.6, // Random 
-          };
-        }, {} as Rec
-        metadat
-    conciseness: 3,
-          timestam
-    helpfulness: 3,
-      setResul
-    factualGrounding: 3
-    }
-
-
   const [isCalculating, setIsCalculating] = useState(false);
 
+  const handleSampleSelect = (sample: any) => {
+    setFormData(prev => ({
+      ...prev,
+      question: sample.question,
+      answer: sample.answer,
+      referenceAnswer: sample.reference || ""
+    }));
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied to clipboard`);
+  };
+
   const handleMetricToggle = (metricId: string) => {
-      exportDate: new Date().to
+    setSelectedMetrics(prev => 
       prev.includes(metricId) 
-    const url = URL.createObjectURL(blob);
+        ? prev.filter(id => id !== metricId)
         : [...prev, metricId]
-    a.
+    );
   };
 
   const calculateMetrics = async () => {
-      {/* Extended Sample Data Library */}
+    if (!formData.question.trim() || !formData.answer.trim()) {
       toast.error("Please provide both question and answer");
-      <div cl
-     
+      return;
+    }
 
-            <div className=
-         
+    setIsCalculating(true);
+    
+    try {
       // Simulate metric calculations
-                    size="sm"
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-                    <Copy c
-                )}
-              <Textarea
-                placeholder="Enter the prompt or question given to the model.
-                value={formData.question}
-          };
-
-              <div className="flex ite
-                {formData.answer
+      const mockResults = {
+        automated: selectedMetrics.reduce((acc, metricId) => {
+          const metric = AUTOMATED_METRICS.find(m => m.id === metricId);
+          if (metric) {
+            acc[metricId] = {
+              label: metric.label,
+              score: Math.random() * 0.4 + 0.6, // Random score between 0.6-1.0
+              description: metric.description
+            };
+          }
+          return acc;
+        }, {} as Record<string, any>),
+        quality: qualityRatings,
         metadata: {
-                    onClick={() => copyToClipboard(formData.answer, "Answer")}
-                  >
-                  </Button>
-              </div>
-         
+          model: formData.model === "Custom" ? formData.customModel : formData.model,
+          timestamp: new Date().toISOString(),
+          inputLength: formData.question.length,
+          outputLength: formData.answer.length
+        }
       };
 
       setResults(mockResults);
-            <div className="grid sm:grid-cols-2 gap-4">
-                <Labe
-                  <SelectTrigger>
-               
-                    {LLM_MODEL
+      toast.success("Evaluation completed successfully");
+    } catch (error) {
+      toast.error("Failed to calculate metrics");
+    } finally {
+      setIsCalculating(false);
     }
-    
+  };
 
-                <div className=
-                  <Input
-    
+  const exportResults = () => {
+    if (!results) {
+      toast.error("No results to export");
+      return;
+    }
+
     const data = {
       input: formData,
       metrics: selectedMetrics,
@@ -136,6 +144,11 @@ export default f
 
   return (
     <div className="space-y-8">
+      {/* Sample Data Library */}
+      <SampleDataLibrary onSampleSelect={handleSampleSelect} />
+
+      <Separator />
+
       {/* Input Section */}
       <div className="grid lg:grid-cols-2 gap-8">
         <Card>
@@ -144,7 +157,18 @@ export default f
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="question">Question/Prompt</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="question">Question/Prompt</Label>
+                {formData.question && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(formData.question, "Question")}
+                  >
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
               <Textarea
                 id="question"
                 placeholder="Enter the prompt or question given to the model..."
@@ -155,7 +179,18 @@ export default f
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="answer">Model Response</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="answer">Model Response</Label>
+                {formData.answer && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(formData.answer, "Answer")}
+                  >
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
               <Textarea
                 id="answer"
                 placeholder="Enter the model's generated answer..."
@@ -236,47 +271,47 @@ export default f
                 ))}
               </div>
             </CardContent>
-
+          </Card>
 
           {/* Quality Ratings */}
           <QualityRatings 
             ratings={qualityRatings}
             onRatingsChange={setQualityRatings}
-
+          />
         </div>
       </div>
 
       <Separator />
 
-
+      {/* Action Buttons */}
       <div className="flex flex-wrap gap-4 justify-center">
-
+        <Button 
           onClick={calculateMetrics}
           disabled={isCalculating || !formData.question.trim() || !formData.answer.trim()}
           className="flex items-center gap-2"
           size="lg"
         >
-
+          <Calculator className="w-4 h-4" />
           {isCalculating ? "Calculating..." : "Evaluate Response"}
         </Button>
 
-
+        {results && (
           <Button 
             variant="outline" 
             onClick={exportResults}
-
+            className="flex items-center gap-2"
             size="lg"
           >
             <Download className="w-4 h-4" />
             Export Results
           </Button>
-
+        )}
       </div>
 
       {/* Results */}
-
+      {results && (
         <MetricResults results={results} />
-
+      )}
     </div>
-
+  );
 }

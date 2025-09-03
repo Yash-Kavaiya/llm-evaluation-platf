@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass, GithubLogo, LinkedinLogo, TwitterLogo, Medium } from "@phosphor-icons/react";
+import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass, GithubLogo, LinkedinLogo, TwitterLogo, Article } from "@phosphor-icons/react";
 import { Toaster } from "@/components/ui/sonner";
 import ManualEvaluation from "@/components/ManualEvaluation";
 import BulkEvaluation from "@/components/BulkEvaluation";
@@ -62,7 +62,7 @@ function App() {
                 className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                 title="Medium Articles"
               >
-                <Medium className="w-5 h-5 text-secondary-foreground" />
+                <Article className="w-5 h-5 text-secondary-foreground" />
               </a>
             </div>
           </div>
