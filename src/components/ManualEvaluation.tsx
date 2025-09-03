@@ -1,35 +1,32 @@
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/sep
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { Calculator, Download, Copy } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import MetricResults from "./MetricResults";
 import SampleDataLibrary from "./SampleDataLibrary";
+import QualityRatings from "./QualityRatings";
+
 const LLM_MODELS = [
+  "GPT-4",
   "GPT-3.5 Turbo",
-  "Claude-3 Sonnet",
+  "Claude-3 Sonnet", 
+  "Claude-3 Haiku",
+  "Gemini Pro",
   "Llama 2",
   "Custom Model"
-
-  { id: "coherence", label: "Coherence Score", descr
-
-  { id: "rouge", lab
-  { id: "t
 ];
-export default fun
-    question: "",
-    model: "",
-    referenc
 
-  
-  
-
-    creativity: 3,
-    safety: 3,
-  });
-  const [results, setResults] = useState<any>(null);
-
+const AUTOMATED_METRICS = [
+  { id: "coherence", label: "Coherence Score", description: "Logical flow and consistency" },
+  { id: "fluency", label: "Fluency Score", description: "Language quality and readability" },
+  { id: "relevance", label: "Relevance Score", description: "Response appropriateness" },
   { id: "rouge", label: "ROUGE Scores", description: "Text overlap metrics" },
   { id: "bleu", label: "BLEU Score", description: "N-gram overlap (requires reference)" },
   { id: "toxicity", label: "Toxicity Detection", description: "Harmful content analysis" },
@@ -62,13 +59,13 @@ export default function ManualEvaluation() {
   const [isCalculating, setIsCalculating] = useState(false);
 
   const handleSampleSelect = (sample: any) => {
-      const mockResults = 
+    setFormData(prev => ({
       ...prev,
-          details: `Calculated $
+      question: sample.question,
       answer: sample.answer,
-      }, {} as any);
+      model: sample.model || ""
     }));
-    
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -76,31 +73,31 @@ export default function ManualEvaluation() {
   };
 
   const handleMetricToggle = (metricId: string) => {
-        }
+    setSelectedMetrics(prev => 
       prev.includes(metricId) 
         ? prev.filter(id => id !== metricId)
         : [...prev, metricId]
-    } 
+    );
   };
 
   const calculateMetrics = async () => {
     if (!formData.question.trim() || !formData.answer.trim()) {
       toast.error("Please provide both question and answer");
-    }
+      return;
     }
 
     setIsCalculating(true);
     try {
       // Simulate API call
-    const url = URL.createObjectURL(blob);
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       const mockResults = selectedMetrics.reduce((acc, metric) => {
         acc[metric] = {
           score: Math.random() * 0.4 + 0.6, // Score between 0.6-1.0
           details: `Calculated ${metric} score based on input analysis`
-
+        };
         return acc;
-      {/* Sample Dat
+      }, {} as any);
 
       const overallScore = (
         Object.values(mockResults).reduce((sum: number, metric: any) => sum + metric.score, 0) / Object.keys(mockResults).length +
@@ -120,21 +117,21 @@ export default function ManualEvaluation() {
       });
 
       toast.success("Evaluation completed successfully!");
-
+    } catch (error) {
       toast.error("Failed to calculate metrics");
     } finally {
       setIsCalculating(false);
-     
+    }
   };
 
   const exportResults = () => {
     if (!results) {
       toast.error("No results to export");
-             
+      return;
     }
     
     const exportData = {
-
+      input: formData,
       ...results,
       exportDate: new Date().toISOString()
     };
@@ -142,25 +139,25 @@ export default function ManualEvaluation() {
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-                 
+    a.href = url;
     a.download = 'evaluation-results.json';
-
+    a.click();
     URL.revokeObjectURL(url);
     
     toast.success("Results exported successfully!");
-    
+  };
 
   return (
     <div className="space-y-6">
-            </div>
+      {/* Sample Data Library */}
       <SampleDataLibrary onSampleSelect={handleSampleSelect} />
       
       <div className="grid lg:grid-cols-2 gap-6">
-                placeholder="
+        {/* Input Section */}
         <Card>
-                onChan
+          <CardHeader>
             <CardTitle>Input Data</CardTitle>
-          </CardContent
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -170,9 +167,9 @@ export default function ManualEvaluation() {
                   size="sm"
                   onClick={() => copyToClipboard(formData.question)}
                   disabled={!formData.question.trim()}
-                 
+                >
                   <Copy className="w-4 h-4" />
-                    <div 
+                </Button>
               </div>
               <Textarea
                 id="question"
@@ -180,37 +177,37 @@ export default function ManualEvaluation() {
                 className="min-h-[120px]"
                 value={formData.question}
                 onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
-          </Card
+              />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="answer">Model Response</Label>
-      {/* Action Button
+                <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => copyToClipboard(formData.answer)}
-          className="flex items-center gap-2"
+                  disabled={!formData.answer.trim()}
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
-        <Button 
+              </div>
               <Textarea
-          disabled={!result
+                id="answer"
                 placeholder="Enter the model's response..."
                 className="min-h-[120px]"
                 value={formData.answer}
                 onChange={(e) => setFormData(prev => ({ ...prev, answer: e.target.value }))}
               />
-      {/* Results 
+            </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="model">Model</Label>
                 <Select value={formData.model} onValueChange={(value) => setFormData(prev => ({ ...prev, model: value }))}>
-
+                  <SelectTrigger>
                     <SelectValue placeholder="Select model" />
-
+                  </SelectTrigger>
                   <SelectContent>
                     {LLM_MODELS.map(model => (
                       <SelectItem key={model} value={model}>{model}</SelectItem>
@@ -222,17 +219,17 @@ export default function ManualEvaluation() {
               {formData.model === "Custom Model" && (
                 <div className="space-y-2">
                   <Label htmlFor="customModel">Custom Model Name</Label>
-
+                  <Input
                     id="customModel"
                     placeholder="Enter custom model name"
                     value={formData.customModel}
                     onChange={(e) => setFormData(prev => ({ ...prev, customModel: e.target.value }))}
                   />
-
+                </div>
               )}
+            </div>
 
-
-
+            <div className="space-y-2">
               <Label htmlFor="reference">Reference Answer (Optional)</Label>
               <Textarea
                 id="reference"
@@ -240,7 +237,7 @@ export default function ManualEvaluation() {
                 className="min-h-[80px]"
                 value={formData.reference}
                 onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
-
+              />
             </div>
           </CardContent>
         </Card>
@@ -248,7 +245,7 @@ export default function ManualEvaluation() {
         {/* Configuration Section */}
         <div className="space-y-6">
           <Card>
-
+            <CardHeader>
               <CardTitle>Automated Metrics</CardTitle>
             </CardHeader>
             <CardContent>
@@ -268,13 +265,13 @@ export default function ManualEvaluation() {
                         {metric.description}
                       </p>
                     </div>
-
+                  </div>
                 ))}
               </div>
             </CardContent>
+          </Card>
 
-
-
+          <QualityRatings 
             ratings={qualityRatings}
             onRatingsChange={setQualityRatings}
           />
@@ -284,11 +281,11 @@ export default function ManualEvaluation() {
       {/* Action Buttons */}
       <div className="flex items-center gap-4">
         <Button 
-
+          onClick={calculateMetrics}
           disabled={isCalculating || !formData.question.trim() || !formData.answer.trim()}
           size="lg"
           className="flex items-center gap-2"
-
+        >
           <Calculator className="w-4 h-4" />
           {isCalculating ? "Calculating..." : "Evaluate Response"}
         </Button>
@@ -296,7 +293,7 @@ export default function ManualEvaluation() {
         <Button 
           variant="outline"
           onClick={exportResults}
-
+          disabled={!results}
           size="lg"
           className="flex items-center gap-2"
         >
@@ -306,11 +303,12 @@ export default function ManualEvaluation() {
       </div>
 
       {/* Results */}
-
+      {results && (
         <MetricResults 
-
+          results={results}
           onExport={exportResults}
         />
       )}
-
+    </div>
   );
+}
