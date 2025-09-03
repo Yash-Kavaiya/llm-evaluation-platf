@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, Download, Lightbulb, Copy } from "@phosphor-icons/react";
+import { Calculator, Download, Copy } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import MetricResults from "./MetricResults";
 import QualityRatings from "./QualityRatings";
@@ -42,23 +42,7 @@ const AUTOMATED_METRICS = [
   { id: "length", label: "Response Length", description: "Token count and character length" }
 ];
 
-const SAMPLE_DATA = {
-  coding: {
-    question: "Write a Python function to find the longest common subsequence (LCS) between two strings using dynamic programming.",
-    answer: "Here's a Python implementation of the LCS algorithm using dynamic programming:\n\n```python\ndef longest_common_subsequence(str1, str2):\n    m, n = len(str1), len(str2)\n    \n    # Create a 2D DP table\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    \n    # Fill the DP table\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if str1[i-1] == str2[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n    \n    # Reconstruct the LCS\n    lcs = []\n    i, j = m, n\n    while i > 0 and j > 0:\n        if str1[i-1] == str2[j-1]:\n            lcs.append(str1[i-1])\n            i -= 1\n            j -= 1\n        elif dp[i-1][j] > dp[i][j-1]:\n            i -= 1\n        else:\n            j -= 1\n    \n    return ''.join(reversed(lcs))\n\n# Example usage\nresult = longest_common_subsequence('ABCDGH', 'AEDFHR')\nprint(result)  # Output: 'ADH'\n```\n\nTime complexity: O(m*n), Space complexity: O(m*n)",
-    reference: "def lcs(str1, str2):\n    m, n = len(str1), len(str2)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    \n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if str1[i-1] == str2[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n    \n    return dp[m][n]"
-  },
-  creative: {
-    question: "Write a science fiction short story about a world where memories can be traded as currency.",
-    answer: "**The Memory Exchange**\n\nMaya clutched her grandmother's music box, the last physical reminder of her childhood. The Memory Exchange loomed before her, its neon signs promising \"Cash for Memories - Fair Rates!\"\n\nInside, traders appraised memories like precious gems. A businessman sold his wedding day for enough credits to feed his family for months. A teenager traded her first kiss to afford college tuition.\n\n\"What do you have?\" asked the trader, neural scanner already humming.\n\n\"My grandmother teaching me to bake cookies,\" Maya whispered. \"Worth 500 credits according to your database.\"\n\nThe trader's eyes lit up. \"Childhood memories with emotional attachment? We can go 800.\"\n\nMaya hesitated. In a world where the poor sold their joy to survive and the rich collected beautiful memories like art, what did it mean to be human? She thought of her hungry daughter waiting at home.\n\n\"Make it 1000,\" she said, \"and you have a deal.\"\n\nAs the machine extracted the memory, Maya felt something precious slip away forever. But her daughter would eat tonight. In the Memory Exchange, love always had a price.",
-    reference: ""
-  },
-  analysis: {
-    question: "Analyze the impact of social media on modern democracy and political discourse.",
-    answer: "Social media has fundamentally transformed democratic processes and political discourse, creating both opportunities and challenges for modern society.\n\n**Positive Impacts:**\n\n1. **Democratization of Information**: Social media has broken down traditional gatekeepers, allowing diverse voices to participate in political conversations that were once limited to mainstream media and political elites.\n\n2. **Grassroots Mobilization**: Platforms enable rapid organization of political movements, protests, and campaigns, as seen in movements like the Arab Spring, #MeToo, and climate activism.\n\n3. **Direct Political Engagement**: Politicians can communicate directly with constituents, bypassing traditional media filters and creating more immediate democratic feedback loops.\n\n4. **Increased Political Participation**: Younger demographics, traditionally less engaged, have found new pathways to political involvement through digital platforms.\n\n**Negative Impacts:**\n\n1. **Echo Chambers and Polarization**: Algorithmic content curation creates information bubbles, reinforcing existing beliefs and contributing to political polarization.\n\n2. **Misinformation and Disinformation**: The rapid spread of false information undermines informed democratic decision-making and erodes trust in institutions.\n\n3. **Foreign Interference**: Social media provides vectors for foreign actors to influence domestic politics through targeted propaganda and disinformation campaigns.\n\n4. **Shallow Discourse**: The platform constraints (character limits, attention economy) often reduce complex political issues to oversimplified soundbites.\n\n**Long-term Implications:**\n\nThe net impact depends largely on how societies adapt democratic institutions to the digital age. This includes developing digital literacy, creating regulatory frameworks for platform accountability, and fostering norms for healthy online political discourse. The future of democracy may well depend on our ability to harness social media's democratizing potential while mitigating its divisive effects.",
-    reference: ""
-  }
-};
+
 
 export default function ManualEvaluation() {
   const [formData, setFormData] = useState({
@@ -87,17 +71,7 @@ export default function ManualEvaluation() {
   const [results, setResults] = useState<any>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
-  const loadSampleData = (type: keyof typeof SAMPLE_DATA) => {
-    const sample = SAMPLE_DATA[type];
-    setFormData(prev => ({
-      ...prev,
-      question: sample.question,
-      answer: sample.answer,
-      referenceAnswer: sample.reference,
-      model: "GPT-4"
-    }));
-    toast.success(`Loaded ${type} sample data`);
-  };
+
 
   const loadSampleFromLibrary = (sample: { question: string; answer: string; reference?: string }) => {
     setFormData(prev => ({
@@ -184,52 +158,6 @@ export default function ManualEvaluation() {
     <div className="space-y-8">
       {/* Extended Sample Data Library */}
       <SampleDataLibrary onLoadSample={loadSampleFromLibrary} />
-
-      {/* Quick Sample Data Section */}
-      <Card className="bg-accent/30">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-accent-foreground" />
-            Quick Sample Data
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Quick load basic sample question-answer pairs for immediate testing
-            </p>
-            <div className="grid sm:grid-cols-3 gap-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => loadSampleData('coding')}
-                className="flex items-center gap-2 justify-start"
-              >
-                <Badge variant="secondary">Code</Badge>
-                LCS Algorithm (Advanced)
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => loadSampleData('creative')}
-                className="flex items-center gap-2 justify-start"
-              >
-                <Badge variant="secondary">Creative</Badge>
-                Memory Trading Story
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => loadSampleData('analysis')}
-                className="flex items-center gap-2 justify-start"
-              >
-                <Badge variant="secondary">Analysis</Badge>
-                Social Media Democracy
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Input Section */}
       <div className="grid lg:grid-cols-2 gap-8">
