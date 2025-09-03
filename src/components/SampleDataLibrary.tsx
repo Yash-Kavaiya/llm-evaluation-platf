@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { 
-  FolderOpen, 
+  Folder, 
   Copy, 
   FileText, 
   Code, 
@@ -128,7 +128,7 @@ export default function SampleDataLibrary({ onSampleSelect }: SampleDataLibraryP
     <Card className="bg-accent/30">
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
-          <FolderOpen className="w-5 h-5 text-accent-foreground" />
+          <Folder className="w-5 h-5 text-accent-foreground" />
           Sample Data Library
         </CardTitle>
       </CardHeader>
@@ -263,7 +263,7 @@ export default function SampleDataLibrary({ onSampleSelect }: SampleDataLibraryP
                           onClick={() => loadSample(sample)}
                           className="h-6 w-6 p-0"
                         >
-                          <FolderOpen className="w-3 h-3" />
+                          <Folder className="w-3 h-3" />
                         </Button>
                       </div>
                     </div>

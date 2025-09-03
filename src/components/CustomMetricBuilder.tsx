@@ -13,10 +13,10 @@ import {
   Plus, 
   Trash, 
   Copy, 
-  FloppyDisk, 
-  FolderOpen, 
-  TestTube,
-  MathOperations,
+  CheckCircle, 
+  Folder, 
+  Flask,
+  Calculator,
   Function as FunctionIcon,
   Brackets,
   Info,
@@ -474,7 +474,7 @@ export default function CustomMetricBuilder() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MathOperations className="w-5 h-5" />
+                <Calculator className="w-5 h-5" />
                 Formula Editor
               </CardTitle>
             </CardHeader>
@@ -586,7 +586,7 @@ export default function CustomMetricBuilder() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TestTube className="w-5 h-5" />
+                <Flask className="w-5 h-5" />
                 Test Formula
               </CardTitle>
             </CardHeader>
@@ -631,7 +631,7 @@ export default function CustomMetricBuilder() {
           {/* Action Buttons */}
           <div className="flex gap-3">
             <Button onClick={saveMetric} disabled={!validation.isValid} className="flex-1">
-              <FloppyDisk className="w-4 h-4 mr-2" />
+              <CheckCircle className="w-4 h-4 mr-2" />
               {isEditing ? "Update Metric" : "Save Metric"}
             </Button>
           </div>
@@ -661,7 +661,7 @@ export default function CustomMetricBuilder() {
                       onClick={() => loadSampleFormula(sample)}
                       className="h-auto p-1"
                     >
-                      <FolderOpen className="w-3 h-3" />
+                      <Folder className="w-3 h-3" />
                     </Button>
                   </div>
                   <div className="bg-muted p-2 rounded text-xs font-mono break-all">
@@ -706,7 +706,7 @@ export default function CustomMetricBuilder() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FloppyDisk className="w-5 h-5" />
+                <CheckCircle className="w-5 h-5" />
                 Saved Metrics ({customMetrics.length})
               </CardTitle>
             </CardHeader>
@@ -734,7 +734,7 @@ export default function CustomMetricBuilder() {
                             onClick={() => editMetric(metric)}
                             className="h-6 w-6 p-0"
                           >
-                            <FolderOpen className="w-3 h-3" />
+                            <Folder className="w-3 h-3" />
                           </Button>
                           <Button
                             variant="ghost"

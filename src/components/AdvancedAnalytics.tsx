@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useKV } from '@github/spark/hooks';
 import { 
-  BarChart3,
-  LineChart,
-  PieChart,
+  ChartBar,
+  ChartLine,
+  ChartPie,
   Calendar,
   Download,
-  RefreshCw,
+  ArrowClockwise,
   Target,
   TrendUp,
   TrendDown
@@ -53,7 +53,7 @@ interface ModelComparison {
   trendPercentage: number;
 }
 
-export default function AdvancedAnalytics() {
+function AdvancedAnalytics() {
   const [evaluationHistory] = useKV<EvaluationRecord[]>("evaluation-history", []);
   const [selectedModel, setSelectedModel] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("30");
@@ -289,7 +289,7 @@ export default function AdvancedAnalytics() {
 
             <div className="flex gap-2 ml-auto">
               <Button variant="outline" size="sm" onClick={refreshData}>
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <ArrowClockwise className="w-4 h-4 mr-2" />
                 Refresh
               </Button>
               <Button variant="outline" size="sm" onClick={exportData}>
@@ -593,3 +593,5 @@ export default function AdvancedAnalytics() {
     </div>
   );
 }
+
+export default AdvancedAnalytics;

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Download, Play, Pause, RotateCcw, FileText, FolderOpen } from "@phosphor-icons/react";
+import { Upload, Download, Play, Pause, ArrowCounterClockwise, FileText, Folder } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface CSVData {
@@ -67,7 +67,7 @@ const CSV_TEMPLATES = {
   }
 };
 
-export default function BulkEvaluation() {
+function BulkEvaluation() {
   const [csvData, setCsvData] = useState<CSVData | null>(null);
   const [columnMapping, setColumnMapping] = useState({
     question: "",
@@ -523,7 +523,7 @@ export default function BulkEvaluation() {
 
                 {(results || isPaused) && (
                   <Button onClick={resetProcessing} variant="outline" className="flex items-center gap-2">
-                    <RotateCcw className="w-4 h-4" />
+                    <ArrowCounterClockwise className="w-4 h-4" />
                     Reset
                   </Button>
                 )}
@@ -592,3 +592,5 @@ export default function BulkEvaluation() {
     </div>
   );
 }
+
+export default BulkEvaluation;

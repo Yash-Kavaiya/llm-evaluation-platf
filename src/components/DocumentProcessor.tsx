@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
-  CubeTransparent, 
+  Cube, 
   Lightning, 
   CheckCircle, 
   Info,
@@ -583,7 +583,7 @@ Hours passed. The team took shifts monitoring the process, but Elena remained at
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CubeTransparent className="w-5 h-5" />
+              <Cube className="w-5 h-5" />
               Processing Configuration
             </CardTitle>
             <CardDescription>

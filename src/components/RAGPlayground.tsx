@@ -18,14 +18,14 @@ import {
   CheckCircle, 
   Warning,
   Article,
-  Ranking,
+  ListNumbers,
   Upload,
   File,
   FilePdf,
   FileText,
   Trash,
   Plus,
-  CubeTransparent,
+  Cube,
   Scissors
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
@@ -373,7 +373,7 @@ export default function RAGPlayground() {
             RAG Query
           </TabsTrigger>
           <TabsTrigger value="processor" className="flex items-center gap-2">
-            <CubeTransparent className="w-4 h-4" />
+            <Cube className="w-4 h-4" />
             Document Processor
           </TabsTrigger>
           <TabsTrigger value="knowledge" className="flex items-center gap-2">
@@ -562,7 +562,7 @@ export default function RAGPlayground() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CubeTransparent className="w-5 h-5" />
+                <Cube className="w-5 h-5" />
                 Document Preprocessing
               </CardTitle>
               <CardDescription>
@@ -661,7 +661,7 @@ export default function RAGPlayground() {
                   </ScrollArea>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    <CubeTransparent className="w-8 h-8 mx-auto mb-2" />
+                    <Cube className="w-8 h-8 mx-auto mb-2" />
                     <p className="text-sm">No processed chunks yet</p>
                     <p className="text-xs">Use the Document Processor to create chunks with embeddings</p>
                   </div>
@@ -745,7 +745,7 @@ export default function RAGPlayground() {
                             <Badge variant="outline">#{index + 1}</Badge>
                             {doc.source === "Processed Chunk" && (
                               <Badge variant="secondary" className="text-xs">
-                                <CubeTransparent className="w-3 h-3 mr-1" />
+                                <Cube className="w-3 h-3 mr-1" />
                                 Embedded
                               </Badge>
                             )}
@@ -771,7 +771,7 @@ export default function RAGPlayground() {
                               </span>
                             )}
                             <div className="flex items-center gap-1">
-                              <Ranking className="w-3 h-3" />
+                              <ListNumbers className="w-3 h-3" />
                               <span className="text-xs">Score: {doc.relevance_score.toFixed(3)}</span>
                             </div>
                           </div>
