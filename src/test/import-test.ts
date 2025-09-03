@@ -2,7 +2,6 @@
 import App from "../App";
 import ManualEvaluation from "../components/ManualEvaluation";
 import BulkEvaluation from "../components/BulkEvaluation";
-import CustomMetricBuilder from "../components/CustomMetricBuilder";
 import ResponsibleAI from "../components/ResponsibleAI";
 import RAGPlayground from "../components/RAGPlayground";
 
