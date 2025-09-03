@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Download, Play, Pause, RotateCcw } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { useKV } from '@github/spark/hooks';
 
 interface CSVData {
   headers: string[];
@@ -46,7 +45,7 @@ export default function BulkEvaluation() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [results, setResults] = useKV<ProcessingResults | null>("bulk-evaluation-results", null);
+  const [results, setResults] = useState<ProcessingResults | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
