@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartBar, Upload, Function as FunctionIcon } from "@phosphor-icons/react";
+import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass } from "@phosphor-icons/react";
 import { Toaster } from "@/components/ui/sonner";
 import ManualEvaluation from "@/components/ManualEvaluation";
 import BulkEvaluation from "@/components/BulkEvaluation";
 import CustomMetricBuilder from "@/components/CustomMetricBuilder";
+import ResponsibleAI from "@/components/ResponsibleAI";
+import RAGPlayground from "@/components/RAGPlayground";
 
 function App() {
   const [activeTab, setActiveTab] = useState("manual");
@@ -28,7 +30,7 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3">
+          <TabsList className="grid w-full max-w-4xl grid-cols-5">
             <TabsTrigger value="manual" className="flex items-center gap-2">
               <ChartBar className="w-4 h-4" />
               Manual Evaluation
@@ -40,6 +42,14 @@ function App() {
             <TabsTrigger value="custom" className="flex items-center gap-2">
               <FunctionIcon className="w-4 h-4" />
               Custom Metrics
+            </TabsTrigger>
+            <TabsTrigger value="responsible" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Responsible AI
+            </TabsTrigger>
+            <TabsTrigger value="rag" className="flex items-center gap-2">
+              <MagnifyingGlass className="w-4 h-4" />
+              RAG Playground
             </TabsTrigger>
           </TabsList>
 
@@ -81,6 +91,34 @@ function App() {
               </CardHeader>
               <CardContent>
                 <CustomMetricBuilder />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="responsible" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Responsible AI Assessment</CardTitle>
+                <CardDescription>
+                  Evaluate AI systems for bias, fairness, toxicity, and ethical considerations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsibleAI />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="rag" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>RAG Playground</CardTitle>
+                <CardDescription>
+                  Test and evaluate Retrieval-Augmented Generation systems with context and retrieval analysis
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RAGPlayground />
               </CardContent>
             </Card>
           </TabsContent>
