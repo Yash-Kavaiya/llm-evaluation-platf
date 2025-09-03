@@ -5,9 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Calculator, Download, Copy } from "@phosphor-icons/react";
-import { toast } from "sonner";
-import MetricResults from "./MetricResults";
 import SampleDataLibrary from "./SampleDataLibrary";
 import QualityRatings from "./QualityRatings";
 
@@ -78,6 +75,9 @@ export default function ManualEvaluation() {
     );
   };
 
+  const calculateMetrics = async () => {
+    if (!formData.question.trim() || !formData.answer.trim()) {
+      toast.error("Please provide both question and answer");
   const calculateMetrics = async () => {
     if (!formData.question.trim() || !formData.answer.trim()) {
       toast.error("Please provide both question and answer");
@@ -153,9 +153,6 @@ export default function ManualEvaluation() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Input Section */}
         <Card>
-          <CardHeader>
-            <CardTitle>Input Data</CardTitle>
-          </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
