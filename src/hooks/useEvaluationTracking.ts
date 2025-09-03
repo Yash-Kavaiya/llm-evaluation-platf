@@ -9,9 +9,8 @@ export interface EvaluationRecord {
   metrics: {
     relevance: number;
     accuracy: number;
-    coherence: number;
+    clarity: number;
     helpfulness: number;
-    harmlessness: number;
   };
   overallScore: number;
   category?: string;

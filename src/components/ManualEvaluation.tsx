@@ -163,12 +163,12 @@ export default function ManualEvaluation() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const loadSampleData = (data: { question: string; answer: string; model: string }) => {
+  const loadSampleData = (data: { question: string; answer: string; reference?: string }) => {
     setFormData(prev => ({
       ...prev,
       question: data.question,
       answer: data.answer,
-      model: data.model
+      reference: data.reference || ""
     }));
   };
 
@@ -491,7 +491,7 @@ export default function ManualEvaluation() {
       )}
       
       {/* Sample Data Library */}
-      <SampleDataLibrary onLoadSample={loadSampleData} />
+      <SampleDataLibrary onSampleSelect={loadSampleData} />
 
       {/* Input Section */}
       <Card>
