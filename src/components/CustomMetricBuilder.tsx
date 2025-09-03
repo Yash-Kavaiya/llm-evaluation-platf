@@ -16,7 +16,6 @@ import {
   CheckCircle, 
   Folder, 
   Flask,
-  Calculator,
   Function as FunctionIcon,
   Brackets,
   Info,

@@ -577,9 +577,9 @@ function AdvancedAnalytics() {
                             </div>
                           ));
                         })()}
-                      </di
+                      </div>
                   ) : (
-                      No metric data available. Generate some demo data to s
+                      <p className="text-muted-foreground">No metric data available. Generate some demo data to see statistics.</p>
                   )}
                     </div>
                   )}
