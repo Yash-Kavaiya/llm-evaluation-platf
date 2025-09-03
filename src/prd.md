@@ -48,6 +48,32 @@
 - **Purpose**: Enable domain-specific evaluation criteria beyond standard metrics
 - **Success Criteria**: Save/load custom metrics, formula validation, test functionality
 
+### Responsible AI Assessment
+- **Functionality**: Evaluate AI systems for bias, fairness, toxicity, and ethical considerations
+- **Purpose**: Ensure AI outputs meet ethical and safety standards
+- **Success Criteria**: Comprehensive bias detection, toxicity scoring, fairness metrics
+
+### RAG Playground with Document Preprocessing
+- **Functionality**: Test Retrieval-Augmented Generation with advanced document processing
+- **Purpose**: Optimize RAG systems through chunking strategies and embedding analysis
+- **Success Criteria**: Multiple chunking methods, embedding generation, retrieval performance metrics
+
+#### Document Preprocessing Features
+- **Text Chunking Strategies**:
+  - Token-based chunking with configurable size and overlap
+  - Sentence-based chunking preserving semantic boundaries
+  - Paragraph-based chunking for document structure preservation
+  - Semantic-based chunking using topic boundary detection
+- **Embedding Generation**: 
+  - Support for multiple embedding models (OpenAI, Sentence Transformers, Cohere)
+  - Vector similarity calculations for semantic search
+  - Cosine similarity scoring for relevance ranking
+- **Enhanced Retrieval**:
+  - Semantic search using embedding similarity
+  - Keyword matching with term frequency analysis
+  - Hybrid approach combining semantic and keyword methods
+  - Performance metrics for retrieval quality assessment
+
 ### Sample Data & Templates
 - **Functionality**: Pre-loaded examples and downloadable CSV templates
 - **Purpose**: Reduce onboarding friction and demonstrate platform capabilities
