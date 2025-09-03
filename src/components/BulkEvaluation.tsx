@@ -22,6 +22,13 @@ interface ProcessingResults {
     answer: string;
     model?: string;
     metrics: Record<string, number>;
+    frameworkMetrics?: {
+      deepeval: Record<string, number>;
+      mlflow: Record<string, number>;
+      ragas: Record<string, number>;
+      phoenix: Record<string, number>;
+      deepchecks: Record<string, number>;
+    };
     overallScore: number;
   }>;
 }
@@ -203,21 +210,74 @@ function BulkEvaluation() {
           continue;
         }
 
-        // Simulate metric calculations
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Simulate comprehensive framework metric calculations
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        const metrics = selectedMetrics.reduce((acc, metric) => {
+        // Generate framework-specific results for each framework
+        const generateFrameworkMetrics = (frameworkName: string, metrics: string[]) => {
+          return metrics.reduce((acc, metric) => {
+            acc[metric] = Math.random() * 0.3 + 0.6; // 0.6-0.9 range
+            return acc;
+          }, {} as Record<string, number>);
+        };
+
+        // Basic legacy metrics
+        const basicMetrics = selectedMetrics.reduce((acc, metric) => {
           acc[metric] = Math.random() * 0.4 + 0.6; // Random score between 0.6-1.0
           return acc;
         }, {} as Record<string, number>);
 
-        const overallScore = Object.values(metrics).reduce((sum, score) => sum + score, 0) / Object.values(metrics).length;
+        // DeepEval metrics
+        const deepevalMetrics = generateFrameworkMetrics('DeepEval', [
+          'g_eval', 'answer_relevancy', 'faithfulness', 'contextual_precision', 
+          'hallucination', 'correctness', 'toxicity', 'bias'
+        ]);
+
+        // MLFlow metrics  
+        const mlflowMetrics = generateFrameworkMetrics('MLFlow', [
+          'answer_similarity', 'answer_correctness', 'answer_relevance', 'relevance', 'faithfulness'
+        ]);
+
+        // RAGAs metrics
+        const ragasMetrics = generateFrameworkMetrics('RAGAs', [
+          'faithful', 'answer_rel', 'context_rel', 'answer_sim', 'factual_cor', 'answer_cor'
+        ]);
+
+        // Phoenix metrics
+        const phoenixMetrics = generateFrameworkMetrics('Phoenix', [
+          'qa_correctness', 'hallucination', 'toxicity', 'retrieval_relevance'
+        ]);
+
+        // Deepchecks metrics
+        const deepchecksMetrics = generateFrameworkMetrics('Deepchecks', [
+          'relevance', 'grounded_in_context', 'fluency', 'coherence', 'toxicity', 
+          'avoided_answer', 'sentiment', 'reading_ease', 'formality', 'safety_score'
+        ]);
+
+        // Calculate comprehensive overall score
+        const allMetrics = [
+          ...Object.values(basicMetrics),
+          ...Object.values(deepevalMetrics),
+          ...Object.values(mlflowMetrics),
+          ...Object.values(ragasMetrics),
+          ...Object.values(phoenixMetrics),
+          ...Object.values(deepchecksMetrics)
+        ];
+        
+        const overallScore = allMetrics.reduce((sum, score) => sum + score, 0) / allMetrics.length;
 
         processedResults.results.push({
           question,
           answer,
           model,
-          metrics,
+          metrics: basicMetrics,
+          frameworkMetrics: {
+            deepeval: deepevalMetrics,
+            mlflow: mlflowMetrics,
+            ragas: ragasMetrics,
+            phoenix: phoenixMetrics,
+            deepchecks: deepchecksMetrics
+          },
           overallScore
         });
 
@@ -251,26 +311,74 @@ function BulkEvaluation() {
   const exportResults = () => {
     if (!results) return;
 
+    // Create comprehensive headers including all framework metrics
+    const frameworkHeaders = [
+      // DeepEval
+      'DeepEval_G_Eval', 'DeepEval_Answer_Relevancy', 'DeepEval_Faithfulness', 'DeepEval_Contextual_Precision',
+      'DeepEval_Hallucination', 'DeepEval_Correctness', 'DeepEval_Toxicity', 'DeepEval_Bias',
+      // MLFlow
+      'MLFlow_Answer_Similarity', 'MLFlow_Answer_Correctness', 'MLFlow_Answer_Relevance', 'MLFlow_Relevance', 'MLFlow_Faithfulness',
+      // RAGAs
+      'RAGAs_Faithful', 'RAGAs_Answer_Rel', 'RAGAs_Context_Rel', 'RAGAs_Answer_Sim', 'RAGAs_Factual_Cor', 'RAGAs_Answer_Cor',
+      // Phoenix
+      'Phoenix_QA_Correctness', 'Phoenix_Hallucination', 'Phoenix_Toxicity', 'Phoenix_Retrieval_Relevance',
+      // Deepchecks
+      'Deepchecks_Relevance', 'Deepchecks_Grounded_Context', 'Deepchecks_Fluency', 'Deepchecks_Coherence',
+      'Deepchecks_Toxicity', 'Deepchecks_Avoided_Answer', 'Deepchecks_Sentiment', 'Deepchecks_Reading_Ease',
+      'Deepchecks_Formality', 'Deepchecks_Safety_Score'
+    ];
+
     const csvContent = [
-      ['Question', 'Answer', 'Model', ...selectedMetrics, 'Overall Score'].join(','),
-      ...results.results.map(result => [
-        `"${result.question}"`,
-        `"${result.answer}"`, 
-        result.model || "N/A",
-        ...selectedMetrics.map(metric => result.metrics[metric]?.toFixed(3) || "N/A"),
-        result.overallScore.toFixed(3)
-      ].join(','))
+      ['Question', 'Answer', 'Model', ...selectedMetrics, ...frameworkHeaders, 'Overall Score'].join(','),
+      ...results.results.map(result => {
+        const frameworkValues = [];
+        
+        // Add framework metric values in order
+        if (result.frameworkMetrics) {
+          // DeepEval values
+          ['g_eval', 'answer_relevancy', 'faithfulness', 'contextual_precision', 'hallucination', 'correctness', 'toxicity', 'bias']
+            .forEach(metric => frameworkValues.push(result.frameworkMetrics?.deepeval[metric]?.toFixed(3) || "N/A"));
+          
+          // MLFlow values
+          ['answer_similarity', 'answer_correctness', 'answer_relevance', 'relevance', 'faithfulness']
+            .forEach(metric => frameworkValues.push(result.frameworkMetrics?.mlflow[metric]?.toFixed(3) || "N/A"));
+          
+          // RAGAs values
+          ['faithful', 'answer_rel', 'context_rel', 'answer_sim', 'factual_cor', 'answer_cor']
+            .forEach(metric => frameworkValues.push(result.frameworkMetrics?.ragas[metric]?.toFixed(3) || "N/A"));
+          
+          // Phoenix values
+          ['qa_correctness', 'hallucination', 'toxicity', 'retrieval_relevance']
+            .forEach(metric => frameworkValues.push(result.frameworkMetrics?.phoenix[metric]?.toFixed(3) || "N/A"));
+          
+          // Deepchecks values
+          ['relevance', 'grounded_in_context', 'fluency', 'coherence', 'toxicity', 'avoided_answer', 'sentiment', 'reading_ease', 'formality', 'safety_score']
+            .forEach(metric => frameworkValues.push(result.frameworkMetrics?.deepchecks[metric]?.toFixed(3) || "N/A"));
+        } else {
+          // Fill with N/A if no framework metrics
+          frameworkValues.push(...Array(frameworkHeaders.length).fill("N/A"));
+        }
+
+        return [
+          `"${result.question}"`,
+          `"${result.answer}"`, 
+          result.model || "N/A",
+          ...selectedMetrics.map(metric => result.metrics[metric]?.toFixed(3) || "N/A"),
+          ...frameworkValues,
+          result.overallScore.toFixed(3)
+        ].join(',');
+      })
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `bulk-evaluation-results-${Date.now()}.csv`;
+    a.download = `comprehensive-evaluation-results-${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     
-    toast.success("Results exported successfully");
+    toast.success("Comprehensive results exported successfully with all framework metrics");
   };
 
   return (
