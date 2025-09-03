@@ -62,7 +62,7 @@ function AdvancedAnalytics() {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - parseInt(dateRange));
 
-    return evaluationHistory.filter(record => {
+    return (evaluationHistory || []).filter(record => {
       const recordDate = new Date(record.timestamp);
       const isInDateRange = recordDate >= cutoffDate;
       const isSelectedModel = selectedModel === "all" || record.modelName === selectedModel;
@@ -150,11 +150,11 @@ function AdvancedAnalytics() {
 
   // Get unique models and categories
   const uniqueModels = useMemo(() => {
-    return [...new Set(evaluationHistory.map(r => r.modelName))];
+    return [...new Set((evaluationHistory || []).map(r => r.modelName))];
   }, [evaluationHistory]);
 
   const uniqueCategories = useMemo(() => {
-    return [...new Set(evaluationHistory.map(r => r.category).filter(Boolean))];
+    return [...new Set((evaluationHistory || []).map(r => r.category).filter(Boolean))];
   }, [evaluationHistory]);
 
   // Calculate summary statistics
@@ -576,6 +576,7 @@ function AdvancedAnalytics() {
                           ));
                         })()}
                       </div>
+                    </div>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
                       No metric data available. Generate some demo data to see statistics.

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -6,16 +6,57 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Copy } from "@phosphor-icons/react";
+import { Download, Copy, Plus, AlertCircle, CheckCircle } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import SampleDataLibrary from "./SampleDataLibrary";
 import { useEvaluationTracking } from "@/hooks/useEvaluationTracking";
 
-const MODELS = [
-  { id: "gpt-4", name: "GPT-4" },
-  { id: "claude-3", name: "Claude 3" },
-  { id: "gemini-pro", name: "Gemini Pro" },
-  { id: "llama-2", name: "Llama 2" },
+// Backend API configuration
+const API_BASE_URL = 'http://localhost:8000';
+
+interface ApiModel {
+  id: string;
+  name: string;
+  context_length?: number;
+  pricing?: {
+    prompt: number;
+    completion: number;
+  };
+}
+
+interface EvaluationSession {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  evaluation_count: number;
+}
+
+interface EvaluationResult {
+  id: string;
+  session_id: string;
+  prompt: string;
+  context?: string;
+  expected_answer?: string;
+  model_name: string;
+  model_response: string;
+  response_time?: number;
+  tokens_used?: number;
+  accuracy_score?: number;
+  relevance_score?: number;
+  helpfulness_score?: number;
+  clarity_score?: number;
+  overall_score?: number;
+  ragas_scores?: any;
+  deepeval_scores?: any;
+  created_at: string;
+}
+
+// Default models - will be replaced by API data
+const DEFAULT_MODELS = [
+  { id: "deepseek/deepseek-chat-v3.1:free", name: "DeepSeek Chat v3.1 (Free)" },
+  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
+  { id: "anthropic/claude-3-haiku", name: "Claude 3 Haiku" },
   { id: "custom", name: "Custom Model" }
 ];
 
@@ -37,27 +78,86 @@ export default function ManualEvaluation() {
     question: "",
     answer: "",
     reference: "",
+    context: "",
     model: "",
-    customModel: ""
+    customModel: "",
+    category: ""
   });
+  
+  // Backend integration state
+  const [availableModels, setAvailableModels] = useState<ApiModel[]>(DEFAULT_MODELS as any);
+  const [sessions, setSessions] = useState<EvaluationSession[]>([]);
+  const [selectedSession, setSelectedSession] = useState<string>("");
+  const [newSessionName, setNewSessionName] = useState("");
+  const [showNewSession, setShowNewSession] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([
     "rouge1", "coherence", "relevance"
   ]);
   
+  // Updated to match backend 1-10 scale with correct categories
   const [qualityRatings, setQualityRatings] = useState({
-    accuracy: 3,
-    completeness: 3,
-    clarity: 3,
-    conciseness: 3,
-    creativity: 3,
-    helpfulness: 3,
-    safety: 3,
-    factuality: 3
+    accuracy: 5,
+    relevance: 5,
+    helpfulness: 5,
+    clarity: 5,
+    overall: 5
   });
   
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<EvaluationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  
+  // Load initial data
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+  
+  const loadInitialData = async () => {
+    try {
+      // Test connection
+      const healthResponse = await fetch(`${API_BASE_URL}/health`);
+      if (healthResponse.ok) {
+        setIsConnected(true);
+        toast.success("Connected to backend successfully");
+        
+        // Load models
+        try {
+          const modelsResponse = await fetch(`${API_BASE_URL}/models`);
+          if (modelsResponse.ok) {
+            const modelsData = await modelsResponse.json();
+            if (modelsData.models && modelsData.models.length > 0) {
+              setAvailableModels(modelsData.models.map((model: any) => ({
+                id: model.id,
+                name: model.name || model.id
+              })));
+            }
+          }
+        } catch (error) {
+          console.log("Using default models");
+        }
+        
+        // Load sessions
+        try {
+          const sessionsResponse = await fetch(`${API_BASE_URL}/sessions`);
+          if (sessionsResponse.ok) {
+            const sessionsData = await sessionsResponse.json();
+            setSessions(sessionsData);
+            if (sessionsData.length > 0) {
+              setSelectedSession(sessionsData[0].id);
+            }
+          }
+        } catch (error) {
+          console.log("No existing sessions");
+        }
+      }
+    } catch (error) {
+      console.error('Failed to connect to backend:', error);
+      setIsConnected(false);
+      toast.error('Backend connection failed. Using offline mode.');
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -85,6 +185,146 @@ export default function ManualEvaluation() {
     );
   };
 
+  // Create new session
+  const createSession = async () => {
+    if (!newSessionName.trim()) {
+      toast.error('Please enter a session name');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newSessionName,
+          description: `Manual evaluation session created at ${new Date().toLocaleString()}`
+        })
+      });
+      
+      if (response.ok) {
+        const newSession = await response.json();
+        setSessions(prev => [newSession, ...prev]);
+        setSelectedSession(newSession.id);
+        setNewSessionName('');
+        setShowNewSession(false);
+        toast.success('Session created successfully');
+      } else {
+        const error = await response.json();
+        toast.error(`Failed to create session: ${error.detail}`);
+      }
+    } catch (error) {
+      toast.error('Failed to create session');
+    }
+  };
+
+  // Evaluate using backend API
+  const evaluateWithBackend = async () => {
+    if (!selectedSession) {
+      toast.error('Please select or create an evaluation session');
+      return;
+    }
+    
+    if (!formData.question || !formData.model) {
+      toast.error('Please provide question and select a model');
+      return;
+    }
+    
+    setIsEvaluating(true);
+    try {
+      const modelName = formData.model === 'custom' ? formData.customModel : formData.model;
+      
+      const response = await fetch(`${API_BASE_URL}/evaluate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: selectedSession,
+          prompt: formData.question,
+          context: formData.context || null,
+          expected_answer: formData.reference || null,
+          model_name: modelName,
+          category: formData.category || null
+        })
+      });
+      
+      if (response.ok) {
+        const evaluation = await response.json();
+        setResults(evaluation);
+        setFormData(prev => ({ ...prev, answer: evaluation.model_response }));
+        toast.success('Evaluation completed successfully');
+      } else {
+        const error = await response.json();
+        toast.error(`Evaluation failed: ${error.detail}`);
+      }
+    } catch (error) {
+      toast.error('Failed to evaluate with backend');
+    } finally {
+      setIsEvaluating(false);
+    }
+  };
+
+  // Update evaluation with manual scores
+  const updateWithManualScores = async () => {
+    if (!results?.id) {
+      toast.error('No evaluation to update');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/evaluations/${results.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          manual_scores: {
+            accuracy_score: qualityRatings.accuracy,
+            relevance_score: qualityRatings.relevance,
+            helpfulness_score: qualityRatings.helpfulness,
+            clarity_score: qualityRatings.clarity,
+            overall_score: qualityRatings.overall
+          },
+          evaluator_name: 'Manual Evaluator',
+          evaluation_notes: 'Manual evaluation completed'
+        })
+      });
+      
+      if (response.ok) {
+        const updatedEvaluation = await response.json();
+        setResults(updatedEvaluation);
+        toast.success('Manual scores saved successfully');
+        
+        // Update analytics
+        const modelName = formData.model === 'custom' ? formData.customModel : 
+          availableModels.find(m => m.id === formData.model)?.name || formData.model;
+        
+        addEvaluation({
+          modelName,
+          prompt: formData.question,
+          response: formData.answer,
+          metrics: {
+            relevance: qualityRatings.relevance,
+            accuracy: qualityRatings.accuracy,
+            clarity: qualityRatings.clarity,
+            helpfulness: qualityRatings.helpfulness
+          },
+          overallScore: qualityRatings.overall,
+          evaluationType: 'manual',
+          metadata: {
+            evaluationId: results.id,
+            sessionId: selectedSession,
+            responseTime: results.response_time,
+            tokensUsed: results.tokens_used
+          }
+        });
+      } else {
+        const error = await response.json();
+        toast.error(`Failed to save manual scores: ${error.detail}`);
+      }
+    } catch (error) {
+      toast.error('Failed to save manual scores');
+    }
+  };
+  
+  // Legacy offline evaluation
   const calculateMetrics = async () => {
     if (!formData.question || !formData.answer) {
       toast.error("Please provide both question and answer");
@@ -93,8 +333,8 @@ export default function ManualEvaluation() {
 
     setIsCalculating(true);
     try {
-      // Simulate metric calculations
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Simulate metric calculations for offline mode
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       const automaticMetrics = selectedMetrics.reduce((acc, metricId) => {
         const metric = METRICS.find(m => m.id === metricId);
@@ -114,6 +354,8 @@ export default function ManualEvaluation() {
       ) / Object.keys(qualityRatings).length;
 
       const resultData = {
+        id: 'offline-' + Date.now(),
+        model_response: formData.answer,
         automatic: automaticMetrics,
         quality: qualityScore,
         qualityBreakdown: qualityRatings,
@@ -121,36 +363,37 @@ export default function ManualEvaluation() {
           model: formData.model === "custom" ? formData.customModel : formData.model,
           questionLength: formData.question.length,
           answerLength: formData.answer.length,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          mode: 'offline'
         }
       };
 
-      setResults(resultData);
-
-      // Track evaluation for analytics
-      const modelName = formData.model === "custom" ? formData.customModel : MODELS.find(m => m.id === formData.model)?.name || formData.model;
+      setResults(resultData as any);
+      
+      const modelName = formData.model === "custom" ? formData.customModel : 
+        availableModels.find(m => m.id === formData.model)?.name || formData.model;
       
       addEvaluation({
         modelName,
         prompt: formData.question,
         response: formData.answer,
         metrics: {
-          relevance: qualityRatings.helpfulness * 10 / 5, // Convert 1-5 scale to 1-10
-          accuracy: qualityRatings.accuracy * 10 / 5,
-          coherence: qualityRatings.clarity * 10 / 5,
-          helpfulness: qualityRatings.helpfulness * 10 / 5,
-          harmlessness: qualityRatings.safety * 10 / 5
+          relevance: qualityRatings.relevance,
+          accuracy: qualityRatings.accuracy,
+          clarity: qualityRatings.clarity,
+          helpfulness: qualityRatings.helpfulness
         },
-        overallScore: qualityScore * 10 / 5, // Convert 1-5 scale to 1-10
+        overallScore: qualityRatings.overall,
         evaluationType: 'manual',
         metadata: {
           automaticMetrics,
           qualityBreakdown: qualityRatings,
-          selectedMetrics
+          selectedMetrics,
+          mode: 'offline'
         }
       });
 
-      toast.success("Metrics calculated successfully");
+      toast.success("Metrics calculated successfully (offline mode)");
     } catch (error) {
       toast.error("Failed to calculate metrics");
     } finally {
@@ -162,6 +405,7 @@ export default function ManualEvaluation() {
     const exportData = {
       input: formData,
       results: results,
+      manualScores: qualityRatings,
       exportedAt: new Date().toISOString()
     };
 
@@ -176,6 +420,76 @@ export default function ManualEvaluation() {
 
   return (
     <div className="space-y-6">
+      {/* Connection Status */}
+      <Card className={isConnected ? "border-green-200 bg-green-50" : "border-yellow-200 bg-yellow-50"}>
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-2">
+            {isConnected ? (
+              <>
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <p className="text-green-800 text-sm">
+                  ✅ Connected to backend. Full evaluation features available.
+                </p>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-5 h-5 text-yellow-600" />
+                <p className="text-yellow-800 text-sm">
+                  ⚠️ Backend connection failed. Running in offline mode with limited functionality.
+                </p>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Session Management */}
+      {isConnected && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Evaluation Session</CardTitle>
+            <CardDescription>Select or create a session to organize your evaluations</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Select value={selectedSession} onValueChange={setSelectedSession}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select a session" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sessions.map((session) => (
+                    <SelectItem key={session.id} value={session.id}>
+                      {session.name} ({session.evaluation_count} evaluations)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                onClick={() => setShowNewSession(true)}
+                disabled={showNewSession}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Session
+              </Button>
+            </div>
+            
+            {showNewSession && (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter session name"
+                  value={newSessionName}
+                  onChange={(e) => setNewSessionName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && createSession()}
+                />
+                <Button onClick={createSession}>Create</Button>
+                <Button variant="outline" onClick={() => setShowNewSession(false)}>Cancel</Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      
       {/* Sample Data Library */}
       <SampleDataLibrary onLoadSample={loadSampleData} />
 
@@ -183,7 +497,7 @@ export default function ManualEvaluation() {
       <Card>
         <CardHeader>
           <CardTitle>Input Data</CardTitle>
-          <CardDescription>Enter the question/prompt and model response to evaluate</CardDescription>
+          <CardDescription>Enter the question/prompt and model information</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -209,20 +523,22 @@ export default function ManualEvaluation() {
             </div>
             
             <div>
-              <Label htmlFor="answer">Model Response</Label>
+              <Label htmlFor="answer">Model Response {!isConnected && "(Required for offline mode)"}</Label>
               <div className="relative">
                 <Textarea
                   id="answer"
-                  placeholder="Enter the model's response here..."
+                  placeholder={isConnected ? "Will be filled automatically after evaluation" : "Enter the model's response here..."}
                   value={formData.answer}
                   onChange={(e) => handleInputChange("answer", e.target.value)}
                   className="min-h-[120px] pr-10"
+                  disabled={isConnected && !formData.answer}
                 />
                 <Button
                   size="sm"
                   variant="ghost"
                   className="absolute top-2 right-2"
                   onClick={() => copyToClipboard(formData.answer)}
+                  disabled={!formData.answer}
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
@@ -230,10 +546,21 @@ export default function ManualEvaluation() {
             </div>
             
             <div>
-              <Label htmlFor="reference">Reference Answer (Optional)</Label>
+              <Label htmlFor="context">Context (Optional)</Label>
+              <Textarea
+                id="context"
+                placeholder="Enter context information for RAG evaluation..."
+                value={formData.context}
+                onChange={(e) => handleInputChange("context", e.target.value)}
+                className="min-h-[80px]"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="reference">Expected Answer (Optional)</Label>
               <Textarea
                 id="reference"
-                placeholder="Enter reference answer for comparison..."
+                placeholder="Enter expected answer for comparison..."
                 value={formData.reference}
                 onChange={(e) => handleInputChange("reference", e.target.value)}
                 className="min-h-[80px]"
@@ -248,9 +575,9 @@ export default function ManualEvaluation() {
                     <SelectValue placeholder="Select a model" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MODELS.map((model) => (
+                    {availableModels.map((model) => (
                       <SelectItem key={model.id} value={model.id}>
-                        {model.name}
+                        {model.name || model.id}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -268,38 +595,50 @@ export default function ManualEvaluation() {
                 )}
               </div>
             </div>
+            
+            <div>
+              <Label htmlFor="category">Category (Optional)</Label>
+              <Input
+                id="category"
+                placeholder="e.g., Q&A, Summarization, Creative Writing"
+                value={formData.category}
+                onChange={(e) => handleInputChange("category", e.target.value)}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Metric Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Automated Metrics</CardTitle>
-          <CardDescription>Select which automated metrics to calculate</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {METRICS.map((metric) => (
-              <div key={metric.id} className="flex items-start space-x-3 p-3 rounded-lg border">
-                <Checkbox
-                  id={metric.id}
-                  checked={selectedMetrics.includes(metric.id)}
-                  onCheckedChange={(checked) => handleMetricToggle(metric.id, checked as boolean)}
-                />
-                <div className="space-y-1">
-                  <Label htmlFor={metric.id} className="font-medium cursor-pointer">
-                    {metric.label}
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {metric.description}
-                  </p>
+      {/* Metric Selection - Only show in offline mode */}
+      {!isConnected && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Automated Metrics (Offline)</CardTitle>
+            <CardDescription>Select which simulated metrics to calculate</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {METRICS.map((metric) => (
+                <div key={metric.id} className="flex items-start space-x-3 p-3 rounded-lg border">
+                  <Checkbox
+                    id={metric.id}
+                    checked={selectedMetrics.includes(metric.id)}
+                    onCheckedChange={(checked) => handleMetricToggle(metric.id, checked as boolean)}
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor={metric.id} className="font-medium cursor-pointer">
+                      {metric.label}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {metric.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quality Rating Panel */}
       <QualityRatingPanel 
@@ -308,14 +647,36 @@ export default function ManualEvaluation() {
       />
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button 
-          onClick={calculateMetrics}
-          disabled={isCalculating || !formData.question || !formData.answer}
-          className="flex-1"
-        >
-          {isCalculating ? "Calculating..." : "Calculate Metrics"}
-        </Button>
+      <div className="flex gap-3 flex-wrap">
+        {isConnected ? (
+          <>
+            <Button 
+              onClick={evaluateWithBackend}
+              disabled={isEvaluating || !formData.question || !formData.model || !selectedSession}
+              className="flex-1"
+            >
+              {isEvaluating ? "Evaluating..." : "Evaluate with LLM"}
+            </Button>
+            
+            {results && (
+              <Button 
+                onClick={updateWithManualScores}
+                variant="secondary"
+                className="flex-1"
+              >
+                Save Manual Scores
+              </Button>
+            )}
+          </>
+        ) : (
+          <Button 
+            onClick={calculateMetrics}
+            disabled={isCalculating || !formData.question || !formData.answer}
+            className="flex-1"
+          >
+            {isCalculating ? "Calculating..." : "Calculate Metrics (Offline)"}
+          </Button>
+        )}
         
         {results && (
           <Button 
@@ -330,7 +691,7 @@ export default function ManualEvaluation() {
 
       {/* Results Display */}
       {results && (
-        <MetricResults results={results} />
+        <MetricResults results={results} isConnected={isConnected} />
       )}
     </div>
   );
@@ -346,13 +707,10 @@ function QualityRatingPanel({
 }) {
   const qualities = [
     { key: "accuracy", label: "Accuracy/Correctness" },
-    { key: "completeness", label: "Completeness" },
-    { key: "clarity", label: "Clarity" },
-    { key: "conciseness", label: "Conciseness" },
-    { key: "creativity", label: "Creativity/Originality" },
+    { key: "relevance", label: "Relevance" },
     { key: "helpfulness", label: "Helpfulness" },
-    { key: "safety", label: "Safety/Harmlessness" },
-    { key: "factuality", label: "Factual Grounding" }
+    { key: "clarity", label: "Clarity" },
+    { key: "overall", label: "Overall Quality" }
   ];
 
   const handleRatingChange = (key: string, value: number) => {
@@ -363,21 +721,21 @@ function QualityRatingPanel({
     <Card>
       <CardHeader>
         <CardTitle>Quality Assessment</CardTitle>
-        <CardDescription>Rate the response on various quality dimensions (1-5 scale)</CardDescription>
+        <CardDescription>Rate the response on various quality dimensions (1-10 scale)</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {qualities.map(({ key, label }) => (
             <div key={key} className="space-y-2">
               <Label>{label}</Label>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((value) => (
+              <div className="flex gap-1 flex-wrap">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
                   <Button
                     key={value}
                     variant={ratings[key] === value ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleRatingChange(key, value)}
-                    className="w-10 h-10"
+                    className="w-8 h-8 text-xs"
                   >
                     {value}
                   </Button>
@@ -392,7 +750,7 @@ function QualityRatingPanel({
 }
 
 // Metric Results Component
-function MetricResults({ results }: { results: any }) {
+function MetricResults({ results, isConnected }: { results: any; isConnected: boolean }) {
   return (
     <Card>
       <CardHeader>
@@ -403,51 +761,142 @@ function MetricResults({ results }: { results: any }) {
         {/* Overall Score */}
         <div className="text-center p-6 bg-muted rounded-lg">
           <div className="text-3xl font-bold text-primary">
-            {results.quality.toFixed(1)}/5.0
+            {isConnected && results.overall_score ? 
+              `${results.overall_score.toFixed(1)}/10.0` :
+              results.quality ? `${results.quality.toFixed(1)}/10.0` : 'N/A'
+            }
           </div>
           <p className="text-muted-foreground">Overall Quality Score</p>
         </div>
 
-        {/* Automated Metrics */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Automated Metrics</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(results.automatic).map(([key, metric]: [string, any]) => (
-              <div key={key} className="p-4 border rounded-lg">
-                <div className="font-medium">{metric.label}</div>
-                <div className="text-2xl font-bold text-primary">
-                  {metric.score.toFixed(1)}
+        {/* Backend Results */}
+        {isConnected && (
+          <>
+            {/* Manual Scores */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Manual Evaluation Scores</h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div className="text-center">
+                  <div className="text-lg font-semibold">{results.accuracy_score || 'Not rated'}</div>
+                  <div className="text-sm text-muted-foreground">Accuracy</div>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {metric.description}
+                <div className="text-center">
+                  <div className="text-lg font-semibold">{results.relevance_score || 'Not rated'}</div>
+                  <div className="text-sm text-muted-foreground">Relevance</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-semibold">{results.helpfulness_score || 'Not rated'}</div>
+                  <div className="text-sm text-muted-foreground">Helpfulness</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-semibold">{results.clarity_score || 'Not rated'}</div>
+                  <div className="text-sm text-muted-foreground">Clarity</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-semibold">{results.overall_score || 'Not rated'}</div>
+                  <div className="text-sm text-muted-foreground">Overall</div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Quality Breakdown */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Quality Breakdown</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {Object.entries(results.qualityBreakdown).map(([key, value]: [string, any]) => (
-              <div key={key} className="text-center">
-                <div className="text-lg font-semibold">{value}/5</div>
-                <div className="text-sm text-muted-foreground capitalize">
-                  {key.replace(/([A-Z])/g, ' $1').trim()}
-                </div>
+            {/* Automated Evaluation Results */}
+            {(results.ragas_scores || results.deepeval_scores) && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Automated Evaluation Results</h3>
+                
+                {results.ragas_scores && Object.keys(results.ragas_scores).length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="font-medium mb-2">RAGAS Scores</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {Object.entries(results.ragas_scores).map(([metric, score]: [string, any]) => (
+                        <div key={metric} className="p-3 border rounded-lg">
+                          <div className="font-medium capitalize">{metric.replace(/_/g, ' ')}</div>
+                          <div className="text-xl font-bold text-primary">
+                            {typeof score === 'number' ? score.toFixed(3) : 'N/A'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {results.deepeval_scores && Object.keys(results.deepeval_scores).length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">DeepEval Scores</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {Object.entries(results.deepeval_scores).map(([metric, result]: [string, any]) => (
+                        <div key={metric} className="p-3 border rounded-lg">
+                          <div className="font-medium capitalize">{metric.replace(/_/g, ' ')}</div>
+                          <div className="text-xl font-bold text-primary">
+                            {result?.score?.toFixed(3) || 'N/A'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {result?.success ? '✅ Pass' : '❌ Fail'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
+            )}
 
-        {/* Metadata */}
-        <div className="text-sm text-muted-foreground border-t pt-4">
-          <div>Model: {results.metadata.model}</div>
-          <div>Question Length: {results.metadata.questionLength} characters</div>
-          <div>Answer Length: {results.metadata.answerLength} characters</div>
-          <div>Evaluated: {new Date(results.metadata.timestamp).toLocaleString()}</div>
-        </div>
+            {/* Performance Metrics */}
+            <div className="text-sm text-muted-foreground border-t pt-4">
+              <div>Model: {results.model_name}</div>
+              {results.response_time && <div>Response Time: {results.response_time.toFixed(2)}s</div>}
+              {results.tokens_used && <div>Tokens Used: {results.tokens_used}</div>}
+              <div>Evaluated: {new Date(results.created_at || results.timestamp).toLocaleString()}</div>
+            </div>
+          </>
+        )}
+
+        {/* Offline Results */}
+        {!isConnected && results.automatic && (
+          <>
+            {/* Simulated Automated Metrics */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Simulated Automated Metrics</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(results.automatic).map(([key, metric]: [string, any]) => (
+                  <div key={key} className="p-4 border rounded-lg">
+                    <div className="font-medium">{metric.label}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {metric.score.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {metric.description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quality Breakdown */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Quality Breakdown</h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {Object.entries(results.qualityBreakdown).map(([key, value]: [string, any]) => (
+                  <div key={key} className="text-center">
+                    <div className="text-lg font-semibold">{value}/10</div>
+                    <div className="text-sm text-muted-foreground capitalize">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Metadata */}
+            <div className="text-sm text-muted-foreground border-t pt-4">
+              <div>Model: {results.metadata.model}</div>
+              <div>Question Length: {results.metadata.questionLength} characters</div>
+              <div>Answer Length: {results.metadata.answerLength} characters</div>
+              <div>Mode: {results.metadata.mode}</div>
+              <div>Evaluated: {new Date(results.metadata.timestamp).toLocaleString()}</div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
