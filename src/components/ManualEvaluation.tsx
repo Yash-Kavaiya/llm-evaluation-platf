@@ -1,16 +1,10 @@
 import { useState } from "react";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Copy, Calculator, Download } from "@phosphor-icons/react";
-import { toast } from "sonner";
-import SampleDataLibrary from "./SampleDataLibrary";
-import QualityRatings from "./QualityRatings";
+import { Copy, Calculator, Download } from "@phosphor-icons/react";lue } from "@/components/ui/select";
 import MetricResults from "./MetricResults";
 
 const LLM_MODELS = [
