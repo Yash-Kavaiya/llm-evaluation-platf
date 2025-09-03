@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 import { Shield, Warning, CheckCircle, AlertTriangle, Eye, Lock, Scales, Users, Brain, Leaf } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
@@ -545,14 +545,16 @@ export default function ResponsibleAI() {
               </TabsContent>
 
               <TabsContent value="governance" className="space-y-4">
-                <Accordion type="single" collapsible className="w-full">
+                <div className="grid gap-6">
                   {results.responsibility && (
-                    <AccordionItem value="responsibility">
-                      <AccordionTrigger className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Responsibility Metrics
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-4 h-4" />
+                          Responsibility Metrics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
                             <h4 className="font-semibold mb-2">RAI Oversight</h4>
@@ -579,17 +581,19 @@ export default function ResponsibleAI() {
                             ))}
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      </CardContent>
+                    </Card>
                   )}
 
                   {results.auditability && (
-                    <AccordionItem value="auditability">
-                      <AccordionTrigger className="flex items-center gap-2">
-                        <Eye className="w-4 h-4" />
-                        Auditability Metrics
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Eye className="w-4 h-4" />
+                          Auditability Metrics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
                             <h4 className="font-semibold mb-2">Systematic Oversight</h4>
@@ -616,21 +620,23 @@ export default function ResponsibleAI() {
                             ))}
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      </CardContent>
+                    </Card>
                   )}
-                </Accordion>
+                </div>
               </TabsContent>
 
               <TabsContent value="ethics" className="space-y-4">
-                <Accordion type="single" collapsible className="w-full">
+                <div className="grid gap-6">
                   {results.fairness && (
-                    <AccordionItem value="fairness">
-                      <AccordionTrigger className="flex items-center gap-2">
-                        <Scales className="w-4 h-4" />
-                        Fairness & Bias Metrics
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Scales className="w-4 h-4" />
+                          Fairness & Bias Metrics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
                             <h4 className="font-semibold mb-2">Bias Detection</h4>
@@ -657,17 +663,19 @@ export default function ResponsibleAI() {
                             ))}
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      </CardContent>
+                    </Card>
                   )}
 
                   {results.privacy && (
-                    <AccordionItem value="privacy">
-                      <AccordionTrigger className="flex items-center gap-2">
-                        <Lock className="w-4 h-4" />
-                        Privacy & Data Protection
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="w-4 h-4" />
+                          Privacy & Data Protection
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
                             <h4 className="font-semibold mb-2">PII Protection</h4>
@@ -694,21 +702,23 @@ export default function ResponsibleAI() {
                             ))}
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      </CardContent>
+                    </Card>
                   )}
-                </Accordion>
+                </div>
               </TabsContent>
 
               <TabsContent value="technical" className="space-y-4">
-                <Accordion type="single" collapsible className="w-full">
+                <div className="grid gap-6">
                   {results.safety && (
-                    <AccordionItem value="safety">
-                      <AccordionTrigger className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Safety & Security Metrics
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-4 h-4" />
+                          Safety & Security Metrics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
                             <h4 className="font-semibold mb-2">Content Safety</h4>
@@ -735,17 +745,19 @@ export default function ResponsibleAI() {
                             ))}
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      </CardContent>
+                    </Card>
                   )}
 
                   {results.performance && (
-                    <AccordionItem value="performance">
-                      <AccordionTrigger className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4" />
-                        Performance & Reliability
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Performance & Reliability
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
                             <h4 className="font-semibold mb-2">Task Performance</h4>
@@ -772,21 +784,23 @@ export default function ResponsibleAI() {
                             ))}
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      </CardContent>
+                    </Card>
                   )}
-                </Accordion>
+                </div>
               </TabsContent>
 
               <TabsContent value="impact" className="space-y-4">
-                <Accordion type="single" collapsible className="w-full">
+                <div className="grid gap-6">
                   {results.environmental && (
-                    <AccordionItem value="environmental">
-                      <AccordionTrigger className="flex items-center gap-2">
-                        <Leaf className="w-4 h-4" />
-                        Environmental & Resource Metrics
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Leaf className="w-4 h-4" />
+                          Environmental & Resource Metrics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
                             <h4 className="font-semibold mb-2">Environmental Impact</h4>
@@ -813,17 +827,19 @@ export default function ResponsibleAI() {
                             ))}
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      </CardContent>
+                    </Card>
                   )}
 
                   {results.humanAI && (
-                    <AccordionItem value="humanai">
-                      <AccordionTrigger className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        Human-AI Interaction Metrics
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Human-AI Interaction Metrics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
                             <h4 className="font-semibold mb-2">User Experience</h4>
@@ -850,10 +866,76 @@ export default function ResponsibleAI() {
                             ))}
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                      </CardContent>
+                    </Card>
                   )}
-                </Accordion>
+
+                  {results.redressability && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Redressability Metrics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">Redress by Design</h4>
+                            {Object.entries(results.redressability.redressByDesign).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {results.transparency && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Brain className="w-4 h-4" />
+                          Transparency & Explainability
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">Model Interpretability</h4>
+                            {Object.entries(results.transparency.modelInterpretability).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">System Transparency</h4>
+                            {Object.entries(results.transparency.systemTransparency).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
