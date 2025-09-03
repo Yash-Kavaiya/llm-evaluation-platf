@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Calculator, Download } from "@phosphor-icons/react";lue } from "@/components/ui/select";
+import { Copy, Calculator, Download } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import MetricResults from "./MetricResults";
+import SampleDataLibrary from "./SampleDataLibrary";
+import QualityRatings from "./QualityRatings";
 
 const LLM_MODELS = [
   "GPT-4",
