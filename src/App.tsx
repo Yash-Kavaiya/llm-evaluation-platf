@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass } from "@phosphor-icons/react";
+import { ChartBar, Upload, Function as FunctionIcon, Shield, MagnifyingGlass, GithubLogo, LinkedinLogo } from "@phosphor-icons/react";
 import { Toaster } from "@/components/ui/sonner";
 import ManualEvaluation from "@/components/ManualEvaluation";
 import BulkEvaluation from "@/components/BulkEvaluation";
@@ -17,11 +17,35 @@ function App() {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <ChartBar className="w-8 h-8 text-primary" weight="bold" />
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">LLM Evaluation Platform</h1>
-              <p className="text-sm text-muted-foreground">Comprehensive assessment of language model outputs</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <ChartBar className="w-8 h-8 text-primary" weight="bold" />
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">LLM Evaluation Platform</h1>
+                <p className="text-sm text-muted-foreground">Comprehensive assessment of language model outputs</p>
+              </div>
+            </div>
+            
+            {/* Social Links */}
+            <div className="flex items-center gap-3">
+              <a 
+                href="https://github.com/Yash-Kavaiya" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                title="GitHub Profile"
+              >
+                <GithubLogo className="w-5 h-5 text-secondary-foreground" />
+              </a>
+              <a 
+                href="https://www.linkedin.com/in/yashkavaiya/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                title="LinkedIn Profile"
+              >
+                <LinkedinLogo className="w-5 h-5 text-secondary-foreground" />
+              </a>
             </div>
           </div>
         </div>
