@@ -2,59 +2,67 @@
 
 ## Core Purpose & Success
 
-**Mission Statement**: Create a comprehensive, user-friendly platform for evaluating language model outputs using both standard metrics and custom domain-specific formulas.
+**Mission Statement**: Create a comprehensive platform for evaluating language model outputs across performance, responsible AI, and domain-specific metrics with advanced RAG testing capabilities.
 
 **Success Indicators**: 
-- Users can efficiently evaluate individual LLM responses with quantitative metrics
-- Bulk CSV processing enables batch analysis of large datasets
-- Custom metric builder allows domain experts to create specialized evaluation criteria
-- Export capabilities provide actionable insights for LLM development teams
+- Users can efficiently evaluate individual LLM responses with 50+ responsible AI metrics
+- Bulk CSV processing enables batch analysis of large datasets  
+- Responsible AI assessment covers governance, ethics, technical safety, and impact dimensions
+- RAG Playground allows comprehensive retrieval-augmented generation testing
+- Export capabilities provide actionable insights for LLM development and compliance teams
 
-**Experience Qualities**: Professional, Intuitive, Comprehensive
+**Experience Qualities**: Professional, Comprehensive, Ethical
 
 ## Project Classification & Approach
 
-**Complexity Level**: Complex Application (advanced functionality, custom metric creation, data processing)
+**Complexity Level**: Complex Application (advanced responsible AI framework, document processing, comprehensive metric evaluation)
 
-**Primary User Activity**: Acting (evaluating responses, creating metrics, processing data)
+**Primary User Activity**: Acting (evaluating responses, assessing responsible AI compliance, testing RAG systems)
 
 ## Thought Process for Feature Selection
 
-**Core Problem Analysis**: LLM evaluation requires both standardized metrics (BLEU, ROUGE) and domain-specific assessments that existing tools don't provide.
+**Core Problem Analysis**: Modern LLM evaluation requires comprehensive assessment across performance, ethics, safety, and responsible AI dimensions that existing tools don't adequately address.
 
-**User Context**: Data scientists, ML engineers, and domain experts need to evaluate LLM performance for specific use cases like coding, creative writing, analysis, and technical documentation.
+**User Context**: AI ethics teams, compliance officers, ML engineers, and domain experts need to evaluate LLM systems for responsible deployment, regulatory compliance, and comprehensive performance assessment.
 
-**Critical Path**: Upload/Input → Configure Metrics → Process → Review Results → Export Insights
+**Critical Path**: Input/Upload → Configure Assessment Categories → Process Analysis → Review Multi-dimensional Results → Export Compliance Reports
 
 **Key Moments**: 
-1. First evaluation providing immediate, actionable feedback
+1. Comprehensive responsible AI assessment providing governance insights
+2. RAG system evaluation with document processing and retrieval analysis  
+3. Bulk processing completion with detailed compliance reporting
 2. Custom metric creation enabling domain-specific assessment
 3. Bulk processing completing successfully with exportable insights
 
 ## Essential Features
 
 ### Manual Evaluation Interface
-- **Functionality**: Single question-answer evaluation with comprehensive metrics
+- **Functionality**: Single question-answer evaluation with comprehensive performance and quality metrics
 - **Purpose**: Quick assessment and detailed analysis of individual responses
 - **Success Criteria**: Results generated within 2 seconds with visual dashboard
 
 ### Bulk CSV Processing
-- **Functionality**: Batch evaluation of multiple Q&A pairs with progress tracking
+- **Functionality**: Batch evaluation of multiple Q&A pairs with progress tracking and template support
 - **Purpose**: Scale evaluation for large datasets and model comparisons
-- **Success Criteria**: Process 100+ entries with downloadable results
+- **Success Criteria**: Process 100+ entries with downloadable results and CSV templates
 
-### Custom Metric Builder
-- **Functionality**: Formula editor with mathematical functions and domain variables
-- **Purpose**: Enable domain-specific evaluation criteria beyond standard metrics
-- **Success Criteria**: Save/load custom metrics, formula validation, test functionality
+### Responsible AI Assessment (50+ Comprehensive Metrics)
+- **Functionality**: Complete responsible AI evaluation across 10 major categories:
+  - **Responsibility Metrics**: RAI oversight, governance committee effectiveness, competence assessment
+  - **Auditability Metrics**: Data/model/system provenance, compliance checking, systematic oversight  
+  - **Redressability Metrics**: Incident response systems, built-in redundancy mechanisms
+  - **Fairness & Bias Metrics**: Demographic parity, equalized odds, individual/counterfactual fairness
+  - **Safety & Security Metrics**: Content safety, toxicity detection, adversarial robustness
+  - **Transparency & Explainability**: Model interpretability, feature importance, decision clarity
+  - **Performance & Reliability**: Task performance, system availability, consistency metrics
+  - **Privacy & Data Protection**: PII detection, data minimization, differential privacy
+  - **Environmental & Resource**: Carbon footprint, resource utilization, model efficiency
+  - **Human-AI Interaction**: User trust, meaningful human control, oversight effectiveness
+- **Purpose**: Ensure comprehensive compliance with responsible AI frameworks and ethical standards
+- **Success Criteria**: Multi-dimensional assessment with governance insights and compliance reporting
 
-### Responsible AI Assessment
-- **Functionality**: Evaluate AI systems for bias, fairness, toxicity, and ethical considerations
-- **Purpose**: Ensure AI outputs meet ethical and safety standards
-- **Success Criteria**: Comprehensive bias detection, toxicity scoring, fairness metrics
-
-### RAG Playground with Document Preprocessing
-- **Functionality**: Test Retrieval-Augmented Generation with advanced document processing
+### RAG Playground with Advanced Document Processing
+- **Functionality**: Test Retrieval-Augmented Generation with document upload, text chunking, and embedding generation
 - **Purpose**: Optimize RAG systems through chunking strategies and embedding analysis
 - **Success Criteria**: Multiple chunking methods, embedding generation, retrieval performance metrics
 

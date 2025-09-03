@@ -9,130 +9,367 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Warning, CheckCircle, AlertTriangle } from "@phosphor-icons/react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Shield, Warning, CheckCircle, AlertTriangle, Eye, Lock, Scales, Users, Brain, Leaf } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
-interface BiasResult {
-  category: string;
-  score: number;
-  severity: "low" | "medium" | "high";
-  examples?: string[];
-}
-
-interface ToxicityResult {
-  overall: number;
-  categories: {
-    threat: number;
-    insult: number;
-    profanity: number;
-    hate: number;
-    harassment: number;
+// Comprehensive Responsible AI Metrics Interfaces
+interface ResponsibilityMetrics {
+  raiOversight: {
+    rolesResponsibilities: number;
+    aiGovernanceCommittee: number;
+    organizationalRiskTolerance: number;
+  };
+  raiCompetence: {
+    raiTraining: number;
+    raiCapabilityAssessment: number;
   };
 }
 
-interface FairnessResult {
-  demographic_parity: number;
-  equalized_odds: number;
-  treatment_equality: number;
-  counterfactual_fairness: number;
+interface AuditabilityMetrics {
+  systematicOversight: {
+    dataProvenance: number;
+    modelProvenance: number;
+    systemProvenanceLogging: number;
+  };
+  complianceChecking: {
+    auditingScore: number;
+  };
+}
+
+interface RedressabilityMetrics {
+  redressByDesign: {
+    incidentReportingResponse: number;
+    builtInRedundancy: number;
+  };
+}
+
+interface FairnessMetrics {
+  biasDetection: {
+    demographicParity: number;
+    equalizedOdds: number;
+    individualFairness: number;
+    counterfactualFairness: number;
+  };
+  groupFairness: {
+    representationFairness: number;
+    qualityOfServiceFairness: number;
+  };
+}
+
+interface SafetyMetrics {
+  contentSafety: {
+    toxicityDetection: number;
+    hallucinationDetection: number;
+  };
+  robustness: {
+    adversarialRobustness: number;
+    distributionShiftResilience: number;
+  };
+}
+
+interface TransparencyMetrics {
+  modelInterpretability: {
+    featureImportance: number;
+    decisionBoundaryClarity: number;
+  };
+  systemTransparency: {
+    documentationCompleteness: number;
+    stakeholderCommunication: number;
+  };
+}
+
+interface PerformanceMetrics {
+  taskPerformance: {
+    answerRelevancy: number;
+    correctness: number;
+    taskCompletionRate: number;
+  };
+  systemReliability: {
+    availabilityMetrics: number;
+    consistencyMetrics: number;
+  };
+}
+
+interface PrivacyMetrics {
+  piiProtection: {
+    piiDetectionRate: number;
+    dataMinimization: number;
+  };
+  privacyPreservation: {
+    differentialPrivacy: number;
+    dataAnonymizationQuality: number;
+  };
+}
+
+interface EnvironmentalMetrics {
+  environmentalImpact: {
+    carbonFootprint: number;
+    resourceUtilization: number;
+  };
+  sustainability: {
+    modelEfficiency: number;
+  };
+}
+
+interface HumanAIMetrics {
+  userExperience: {
+    userTrust: number;
+    userUnderstanding: number;
+  };
+  humanOversight: {
+    humanInLoopEffectiveness: number;
+    meaningfulHumanControl: number;
+  };
+}
+
+interface ComprehensiveRAIResults {
+  responsibility?: ResponsibilityMetrics;
+  auditability?: AuditabilityMetrics;
+  redressability?: RedressabilityMetrics;
+  fairness?: FairnessMetrics;
+  safety?: SafetyMetrics;
+  transparency?: TransparencyMetrics;
+  performance?: PerformanceMetrics;
+  privacy?: PrivacyMetrics;
+  environmental?: EnvironmentalMetrics;
+  humanAI?: HumanAIMetrics;
 }
 
 export default function ResponsibleAI() {
   const [inputText, setInputText] = useState("");
   const [model, setModel] = useState("");
-  const [selectedChecks, setSelectedChecks] = useState<string[]>([
-    "bias", "toxicity", "fairness", "privacy", "transparency"
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    "responsibility", "fairness", "safety", "transparency", "privacy"
   ]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [results, setResults] = useState<{
-    bias?: BiasResult[];
-    toxicity?: ToxicityResult;
-    fairness?: FairnessResult;
-    privacy?: { score: number; issues: string[] };
-    transparency?: { score: number; explainability: string };
-  }>({});
+  const [results, setResults] = useState<ComprehensiveRAIResults>({});
 
-  const aiChecks = [
-    { id: "bias", label: "Bias Detection", description: "Detect gender, racial, and cultural biases" },
-    { id: "toxicity", label: "Toxicity Analysis", description: "Identify harmful or toxic content" },
-    { id: "fairness", label: "Fairness Assessment", description: "Evaluate demographic fairness" },
-    { id: "privacy", label: "Privacy Protection", description: "Check for PII and privacy risks" },
-    { id: "transparency", label: "Transparency Score", description: "Assess explainability and reasoning" },
+  const metricCategories = [
+    {
+      id: "responsibility",
+      label: "Responsibility Metrics",
+      icon: <Shield className="w-4 h-4" />,
+      description: "RAI oversight, governance, and competence assessment",
+      color: "bg-blue-500"
+    },
+    {
+      id: "auditability", 
+      label: "Auditability Metrics",
+      icon: <Eye className="w-4 h-4" />,
+      description: "Systematic oversight, provenance tracking, and compliance",
+      color: "bg-purple-500"
+    },
+    {
+      id: "redressability",
+      label: "Redressability Metrics", 
+      icon: <CheckCircle className="w-4 h-4" />,
+      description: "Incident response and built-in redundancy systems",
+      color: "bg-green-500"
+    },
+    {
+      id: "fairness",
+      label: "Fairness & Bias Metrics",
+      icon: <Scales className="w-4 h-4" />,
+      description: "Bias detection, demographic parity, and group fairness",
+      color: "bg-orange-500"
+    },
+    {
+      id: "safety",
+      label: "Safety & Security Metrics",
+      icon: <Shield className="w-4 h-4" />,
+      description: "Content safety, toxicity detection, and robustness",
+      color: "bg-red-500"
+    },
+    {
+      id: "transparency",
+      label: "Transparency & Explainability",
+      icon: <Brain className="w-4 h-4" />,
+      description: "Model interpretability and system transparency",
+      color: "bg-cyan-500"
+    },
+    {
+      id: "performance",
+      label: "Performance & Reliability",
+      icon: <CheckCircle className="w-4 h-4" />,
+      description: "Task performance and system reliability metrics",
+      color: "bg-emerald-500"
+    },
+    {
+      id: "privacy",
+      label: "Privacy & Data Protection",
+      icon: <Lock className="w-4 h-4" />,
+      description: "PII protection and privacy preservation",
+      color: "bg-indigo-500"
+    },
+    {
+      id: "environmental",
+      label: "Environmental & Resource",
+      icon: <Leaf className="w-4 h-4" />,
+      description: "Carbon footprint and resource utilization",
+      color: "bg-teal-500"
+    },
+    {
+      id: "humanAI",
+      label: "Human-AI Interaction",
+      icon: <Users className="w-4 h-4" />,
+      description: "User experience and human oversight metrics",
+      color: "bg-pink-500"
+    }
   ];
 
   const mockAnalyze = async () => {
     setIsAnalyzing(true);
     
     // Simulate analysis delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
-    const mockResults: any = {};
+    const mockResults: ComprehensiveRAIResults = {};
     
-    if (selectedChecks.includes("bias")) {
-      mockResults.bias = [
-        { category: "Gender Bias", score: 0.15, severity: "low" as const },
-        { category: "Racial Bias", score: 0.05, severity: "low" as const },
-        { category: "Age Bias", score: 0.25, severity: "medium" as const },
-      ];
+    if (selectedCategories.includes("responsibility")) {
+      mockResults.responsibility = {
+        raiOversight: {
+          rolesResponsibilities: 0.85,
+          aiGovernanceCommittee: 0.78,
+          organizationalRiskTolerance: 0.82
+        },
+        raiCompetence: {
+          raiTraining: 0.88,
+          raiCapabilityAssessment: 0.75
+        }
+      };
     }
-    
-    if (selectedChecks.includes("toxicity")) {
-      mockResults.toxicity = {
-        overall: 0.08,
-        categories: {
-          threat: 0.02,
-          insult: 0.05,
-          profanity: 0.01,
-          hate: 0.03,
-          harassment: 0.04,
+
+    if (selectedCategories.includes("auditability")) {
+      mockResults.auditability = {
+        systematicOversight: {
+          dataProvenance: 0.92,
+          modelProvenance: 0.87,
+          systemProvenanceLogging: 0.83
+        },
+        complianceChecking: {
+          auditingScore: 0.79
+        }
+      };
+    }
+
+    if (selectedCategories.includes("redressability")) {
+      mockResults.redressability = {
+        redressByDesign: {
+          incidentReportingResponse: 0.86,
+          builtInRedundancy: 0.74
         }
       };
     }
     
-    if (selectedChecks.includes("fairness")) {
+    if (selectedCategories.includes("fairness")) {
       mockResults.fairness = {
-        demographic_parity: 0.85,
-        equalized_odds: 0.78,
-        treatment_equality: 0.82,
-        counterfactual_fairness: 0.88,
+        biasDetection: {
+          demographicParity: 0.85,
+          equalizedOdds: 0.78,
+          individualFairness: 0.82,
+          counterfactualFairness: 0.88
+        },
+        groupFairness: {
+          representationFairness: 0.83,
+          qualityOfServiceFairness: 0.79
+        }
       };
     }
-    
-    if (selectedChecks.includes("privacy")) {
-      mockResults.privacy = {
-        score: 0.92,
-        issues: ["Potential email address detected", "Phone number pattern found"]
+
+    if (selectedCategories.includes("safety")) {
+      mockResults.safety = {
+        contentSafety: {
+          toxicityDetection: 0.94,
+          hallucinationDetection: 0.87
+        },
+        robustness: {
+          adversarialRobustness: 0.76,
+          distributionShiftResilience: 0.81
+        }
       };
     }
-    
-    if (selectedChecks.includes("transparency")) {
+
+    if (selectedCategories.includes("transparency")) {
       mockResults.transparency = {
-        score: 0.75,
-        explainability: "The model provides clear reasoning with step-by-step explanations."
+        modelInterpretability: {
+          featureImportance: 0.73,
+          decisionBoundaryClarity: 0.68
+        },
+        systemTransparency: {
+          documentationCompleteness: 0.89,
+          stakeholderCommunication: 0.84
+        }
+      };
+    }
+
+    if (selectedCategories.includes("performance")) {
+      mockResults.performance = {
+        taskPerformance: {
+          answerRelevancy: 0.91,
+          correctness: 0.88,
+          taskCompletionRate: 0.85
+        },
+        systemReliability: {
+          availabilityMetrics: 0.97,
+          consistencyMetrics: 0.89
+        }
+      };
+    }
+
+    if (selectedCategories.includes("privacy")) {
+      mockResults.privacy = {
+        piiProtection: {
+          piiDetectionRate: 0.95,
+          dataMinimization: 0.82
+        },
+        privacyPreservation: {
+          differentialPrivacy: 0.77,
+          dataAnonymizationQuality: 0.86
+        }
+      };
+    }
+
+    if (selectedCategories.includes("environmental")) {
+      mockResults.environmental = {
+        environmentalImpact: {
+          carbonFootprint: 0.72,
+          resourceUtilization: 0.78
+        },
+        sustainability: {
+          modelEfficiency: 0.81
+        }
+      };
+    }
+
+    if (selectedCategories.includes("humanAI")) {
+      mockResults.humanAI = {
+        userExperience: {
+          userTrust: 0.84,
+          userUnderstanding: 0.79
+        },
+        humanOversight: {
+          humanInLoopEffectiveness: 0.87,
+          meaningfulHumanControl: 0.82
+        }
       };
     }
     
     setResults(mockResults);
     setIsAnalyzing(false);
-    toast.success("Responsible AI analysis completed");
+    toast.success("Comprehensive Responsible AI analysis completed");
   };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "low": return "bg-green-500";
-      case "medium": return "bg-yellow-500";
-      case "high": return "bg-red-500";
-      default: return "bg-gray-500";
-    }
+  const getScoreColor = (score: number) => {
+    if (score >= 0.8) return "text-green-600";
+    if (score >= 0.6) return "text-yellow-600";
+    return "text-red-600";
   };
 
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case "low": return <CheckCircle className="w-4 h-4" />;
-      case "medium": return <Warning className="w-4 h-4" />;
-      case "high": return <AlertTriangle className="w-4 h-4" />;
-      default: return <Shield className="w-4 h-4" />;
-    }
+  const getScoreBadge = (score: number) => {
+    if (score >= 0.8) return "default";
+    if (score >= 0.6) return "secondary";
+    return "destructive";
   };
 
   return (
@@ -176,38 +413,53 @@ export default function ResponsibleAI() {
                 onChange={(e) => setInputText(e.target.value)}
                 className="min-h-32"
               />
+              <div className="flex justify-between items-center">
+                <div className="text-xs text-muted-foreground">
+                  <strong>Sample:</strong> "When evaluating job candidates, I prioritize cultural fit and communication skills..."
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setInputText("When evaluating job candidates, I prioritize cultural fit and communication skills. Candidates who can relate to our team's background tend to work better with us. We've found that people from certain universities and neighborhoods often make better employees. Additionally, our ideal candidate should be energetic and able to work long hours, which typically suits younger professionals better.")}
+                >
+                  Load Sample
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Assessment Configuration</CardTitle>
+            <CardTitle>Metric Categories Selection</CardTitle>
             <CardDescription>
-              Select the responsible AI checks to perform
+              Select the responsible AI metric categories to evaluate
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-3">
-              {aiChecks.map((check) => (
-                <div key={check.id} className="flex items-start space-x-3">
+            <div className="grid gap-3 md:grid-cols-2">
+              {metricCategories.map((category) => (
+                <div key={category.id} className="flex items-start space-x-3 p-3 border rounded-lg">
                   <Checkbox
-                    id={check.id}
-                    checked={selectedChecks.includes(check.id)}
+                    id={category.id}
+                    checked={selectedCategories.includes(category.id)}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setSelectedChecks([...selectedChecks, check.id]);
+                        setSelectedCategories([...selectedCategories, category.id]);
                       } else {
-                        setSelectedChecks(selectedChecks.filter(c => c !== check.id));
+                        setSelectedCategories(selectedCategories.filter(c => c !== category.id));
                       }
                     }}
                   />
-                  <div className="grid gap-1.5 leading-none">
-                    <Label htmlFor={check.id} className="font-medium">
-                      {check.label}
-                    </Label>
+                  <div className="grid gap-1.5 leading-none flex-1">
+                    <div className="flex items-center gap-2">
+                      {category.icon}
+                      <Label htmlFor={category.id} className="font-medium text-sm">
+                        {category.label}
+                      </Label>
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      {check.description}
+                      {category.description}
                     </p>
                   </div>
                 </div>
@@ -216,10 +468,10 @@ export default function ResponsibleAI() {
 
             <Button 
               onClick={mockAnalyze} 
-              disabled={!inputText.trim() || selectedChecks.length === 0 || isAnalyzing}
+              disabled={!inputText.trim() || selectedCategories.length === 0 || isAnalyzing}
               className="w-full"
             >
-              {isAnalyzing ? "Analyzing..." : "Run Responsible AI Assessment"}
+              {isAnalyzing ? "Analyzing..." : "Run Comprehensive RAI Assessment"}
             </Button>
           </CardContent>
         </Card>
@@ -229,162 +481,379 @@ export default function ResponsibleAI() {
       {Object.keys(results).length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Assessment Results</CardTitle>
+            <CardTitle>Comprehensive RAI Assessment Results</CardTitle>
             <CardDescription>
-              Comprehensive responsible AI analysis results
+              Detailed analysis across all responsible AI dimensions
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="overview" className="space-y-4">
-              <TabsList>
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="bias">Bias Analysis</TabsTrigger>
-                <TabsTrigger value="toxicity">Toxicity Detection</TabsTrigger>
-                <TabsTrigger value="fairness">Fairness Metrics</TabsTrigger>
-                <TabsTrigger value="privacy">Privacy Assessment</TabsTrigger>
+                <TabsTrigger value="governance">Governance</TabsTrigger>
+                <TabsTrigger value="ethics">Ethics</TabsTrigger>
+                <TabsTrigger value="technical">Technical</TabsTrigger>
+                <TabsTrigger value="impact">Impact</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="overview" className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {results.bias && (
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">Bias Score</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">
-                          {((1 - Math.max(...results.bias.map(b => b.score))) * 100).toFixed(1)}%
-                        </div>
-                        <p className="text-xs text-muted-foreground">Lower is better</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  
-                  {results.toxicity && (
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">Toxicity Score</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">
-                          {((1 - results.toxicity.overall) * 100).toFixed(1)}%
-                        </div>
-                        <p className="text-xs text-muted-foreground">Safety rating</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  
-                  {results.fairness && (
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">Fairness Score</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">
-                          {(Object.values(results.fairness).reduce((a, b) => a + b, 0) / 4 * 100).toFixed(1)}%
-                        </div>
-                        <p className="text-xs text-muted-foreground">Demographic fairness</p>
-                      </CardContent>
-                    </Card>
-                  )}
+              <TabsContent value="overview" className="space-y-6">
+                {/* Overall Score Cards */}
+                <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+                  {Object.entries(results).map(([category, metrics]) => {
+                    const categoryData = metricCategories.find(c => c.id === category);
+                    if (!categoryData) return null;
+                    
+                    // Calculate average score for the category
+                    const flatScores: number[] = [];
+                    Object.values(metrics).forEach(subCategory => {
+                      Object.values(subCategory).forEach(score => {
+                        if (typeof score === 'number') flatScores.push(score);
+                      });
+                    });
+                    const avgScore = flatScores.reduce((a, b) => a + b, 0) / flatScores.length;
+                    
+                    return (
+                      <Card key={category} className="text-center">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-center gap-2">
+                            {categoryData.icon}
+                            <CardTitle className="text-sm">{categoryData.label}</CardTitle>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className={`text-2xl font-bold ${getScoreColor(avgScore)}`}>
+                            {(avgScore * 100).toFixed(0)}%
+                          </div>
+                          <Badge variant={getScoreBadge(avgScore)} className="mt-1">
+                            {avgScore >= 0.8 ? "Excellent" : avgScore >= 0.6 ? "Good" : "Needs Improvement"}
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
+
+                {/* Overall Risk Assessment */}
+                <Alert>
+                  <Shield className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Overall Risk Assessment:</strong> Based on the comprehensive evaluation, 
+                    your AI system shows strong performance across most responsible AI dimensions. 
+                    Focus areas for improvement include transparency and environmental impact metrics.
+                  </AlertDescription>
+                </Alert>
               </TabsContent>
 
-              <TabsContent value="bias" className="space-y-4">
-                {results.bias && (
-                  <div className="space-y-3">
-                    {results.bias.map((bias, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          {getSeverityIcon(bias.severity)}
+              <TabsContent value="governance" className="space-y-4">
+                <Accordion type="single" collapsible className="w-full">
+                  {results.responsibility && (
+                    <AccordionItem value="responsibility">
+                      <AccordionTrigger className="flex items-center gap-2">
+                        <Shield className="w-4 h-4" />
+                        Responsibility Metrics
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
                           <div>
-                            <p className="font-medium">{bias.category}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Risk Score: {(bias.score * 100).toFixed(1)}%
-                            </p>
-                          </div>
-                        </div>
-                        <Badge variant={bias.severity === "low" ? "default" : bias.severity === "medium" ? "secondary" : "destructive"}>
-                          {bias.severity}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="toxicity" className="space-y-4">
-                {results.toxicity && (
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Overall Toxicity</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Progress value={(1 - results.toxicity.overall) * 100} className="flex-1" />
-                        <span className="text-sm font-medium">
-                          {((1 - results.toxicity.overall) * 100).toFixed(1)}% Safe
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid gap-3 md:grid-cols-2">
-                      {Object.entries(results.toxicity.categories).map(([category, score]) => (
-                        <div key={category} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <span className="capitalize">{category}</span>
-                            <span>{((1 - score) * 100).toFixed(1)}%</span>
-                          </div>
-                          <Progress value={(1 - score) * 100} className="h-2" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="fairness" className="space-y-4">
-                {results.fairness && (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {Object.entries(results.fairness).map(([metric, score]) => (
-                      <div key={metric} className="space-y-2">
-                        <div className="flex justify-between">
-                          <Label className="capitalize">{metric.replace('_', ' ')}</Label>
-                          <span className="text-sm font-medium">{(score * 100).toFixed(1)}%</span>
-                        </div>
-                        <Progress value={score * 100} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="privacy" className="space-y-4">
-                {results.privacy && (
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Privacy Protection Score</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Progress value={results.privacy.score * 100} className="flex-1" />
-                        <span className="text-sm font-medium">
-                          {(results.privacy.score * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {results.privacy.issues.length > 0 && (
-                      <Alert>
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription>
-                          <strong>Privacy Issues Detected:</strong>
-                          <ul className="mt-2 space-y-1">
-                            {results.privacy.issues.map((issue, index) => (
-                              <li key={index} className="text-sm">• {issue}</li>
+                            <h4 className="font-semibold mb-2">RAI Oversight</h4>
+                            {Object.entries(results.responsibility.raiOversight).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
                             ))}
-                          </ul>
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
-                )}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">RAI Competence</h4>
+                            {Object.entries(results.responsibility.raiCompetence).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+
+                  {results.auditability && (
+                    <AccordionItem value="auditability">
+                      <AccordionTrigger className="flex items-center gap-2">
+                        <Eye className="w-4 h-4" />
+                        Auditability Metrics
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">Systematic Oversight</h4>
+                            {Object.entries(results.auditability.systematicOversight).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Compliance Checking</h4>
+                            {Object.entries(results.auditability.complianceChecking).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+                </Accordion>
+              </TabsContent>
+
+              <TabsContent value="ethics" className="space-y-4">
+                <Accordion type="single" collapsible className="w-full">
+                  {results.fairness && (
+                    <AccordionItem value="fairness">
+                      <AccordionTrigger className="flex items-center gap-2">
+                        <Scales className="w-4 h-4" />
+                        Fairness & Bias Metrics
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">Bias Detection</h4>
+                            {Object.entries(results.fairness.biasDetection).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Group Fairness</h4>
+                            {Object.entries(results.fairness.groupFairness).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+
+                  {results.privacy && (
+                    <AccordionItem value="privacy">
+                      <AccordionTrigger className="flex items-center gap-2">
+                        <Lock className="w-4 h-4" />
+                        Privacy & Data Protection
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">PII Protection</h4>
+                            {Object.entries(results.privacy.piiProtection).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Privacy Preservation</h4>
+                            {Object.entries(results.privacy.privacyPreservation).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+                </Accordion>
+              </TabsContent>
+
+              <TabsContent value="technical" className="space-y-4">
+                <Accordion type="single" collapsible className="w-full">
+                  {results.safety && (
+                    <AccordionItem value="safety">
+                      <AccordionTrigger className="flex items-center gap-2">
+                        <Shield className="w-4 h-4" />
+                        Safety & Security Metrics
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">Content Safety</h4>
+                            {Object.entries(results.safety.contentSafety).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Robustness</h4>
+                            {Object.entries(results.safety.robustness).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+
+                  {results.performance && (
+                    <AccordionItem value="performance">
+                      <AccordionTrigger className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4" />
+                        Performance & Reliability
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">Task Performance</h4>
+                            {Object.entries(results.performance.taskPerformance).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">System Reliability</h4>
+                            {Object.entries(results.performance.systemReliability).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+                </Accordion>
+              </TabsContent>
+
+              <TabsContent value="impact" className="space-y-4">
+                <Accordion type="single" collapsible className="w-full">
+                  {results.environmental && (
+                    <AccordionItem value="environmental">
+                      <AccordionTrigger className="flex items-center gap-2">
+                        <Leaf className="w-4 h-4" />
+                        Environmental & Resource Metrics
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">Environmental Impact</h4>
+                            {Object.entries(results.environmental.environmentalImpact).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Sustainability</h4>
+                            {Object.entries(results.environmental.sustainability).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+
+                  {results.humanAI && (
+                    <AccordionItem value="humanai">
+                      <AccordionTrigger className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Human-AI Interaction Metrics
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <h4 className="font-semibold mb-2">User Experience</h4>
+                            {Object.entries(results.humanAI.userExperience).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Human Oversight</h4>
+                            {Object.entries(results.humanAI.humanOversight).map(([metric, score]) => (
+                              <div key={metric} className="flex justify-between items-center mb-2">
+                                <span className="text-sm capitalize">{metric.replace(/([A-Z])/g, ' $1')}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={score * 100} className="w-20" />
+                                  <span className="text-sm font-medium">{(score * 100).toFixed(0)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+                </Accordion>
               </TabsContent>
             </Tabs>
           </CardContent>
