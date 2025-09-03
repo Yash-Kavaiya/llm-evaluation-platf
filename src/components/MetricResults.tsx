@@ -7,15 +7,17 @@ import { CheckCircle, AlertTriangle, XCircle } from "@phosphor-icons/react";
 
 interface MetricResultsProps {
   results: {
-    automated: Record<string, { score: number; details: string }>;
+    metrics: Record<string, { score: number; details: string }>;
     quality: Record<string, number>;
+    overall: number;
     metadata: {
       model: string;
-      questionLength: number;
-      answerLength: number;
       timestamp: string;
+      inputLength: number;
+      outputLength: number;
     };
   };
+  onExport: () => void;
 }
 
 const getScoreColor = (score: number) => {
@@ -60,8 +62,8 @@ const formatQualityName = (key: string) => {
   return names[key] || key;
 };
 
-export default function MetricResults({ results }: MetricResultsProps) {
-  const automatedScores = Object.entries(results.automated);
+export default function MetricResults({ results, onExport }: MetricResultsProps) {
+  const automatedScores = Object.entries(results.metrics);
   const qualityScores = Object.entries(results.quality);
   
   const overallAutomatedScore = automatedScores.length > 0 
@@ -72,7 +74,7 @@ export default function MetricResults({ results }: MetricResultsProps) {
     ? qualityScores.reduce((sum, [, score]) => sum + score, 0) / qualityScores.length / 5
     : 0;
 
-  const overallScore = (overallAutomatedScore + overallQualityScore) / 2;
+  const overallScore = results.overall;
 
   return (
     <div className="space-y-6">
@@ -133,8 +135,8 @@ export default function MetricResults({ results }: MetricResultsProps) {
           <CardTitle>Detailed Evaluation Results</CardTitle>
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">Model: {results.metadata.model}</Badge>
-            <Badge variant="outline">Question: {results.metadata.questionLength} chars</Badge>
-            <Badge variant="outline">Answer: {results.metadata.answerLength} chars</Badge>
+            <Badge variant="outline">Question: {results.metadata.inputLength} chars</Badge>
+            <Badge variant="outline">Answer: {results.metadata.outputLength} chars</Badge>
           </div>
         </CardHeader>
         <CardContent>

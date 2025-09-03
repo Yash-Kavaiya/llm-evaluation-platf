@@ -102,10 +102,10 @@ const getDifficultyColor = (difficulty: string) => {
 };
 
 interface SampleDataLibraryProps {
-  onLoadSample: (sample: { question: string; answer: string; reference?: string }) => void;
+  onSampleSelect: (sample: { question: string; answer: string; reference?: string }) => void;
 }
 
-export default function SampleDataLibrary({ onLoadSample }: SampleDataLibraryProps) {
+export default function SampleDataLibrary({ onSampleSelect }: SampleDataLibraryProps) {
   const [selectedSample, setSelectedSample] = useState<SampleData | null>(null);
 
   const copyToClipboard = (text: string, label: string) => {
@@ -114,7 +114,7 @@ export default function SampleDataLibrary({ onLoadSample }: SampleDataLibraryPro
   };
 
   const loadSample = (sample: SampleData) => {
-    onLoadSample({
+    onSampleSelect({
       question: sample.question,
       answer: sample.answer,
       reference: sample.reference

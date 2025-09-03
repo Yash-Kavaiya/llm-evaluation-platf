@@ -5,8 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Copy, Calculator, Download } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import SampleDataLibrary from "./SampleDataLibrary";
 import QualityRatings from "./QualityRatings";
+import MetricResults from "./MetricResults";
 
 const LLM_MODELS = [
   "GPT-4",
@@ -47,7 +52,7 @@ export default function ManualEvaluation() {
     creativity: 3,
     helpfulness: 3,
     safety: 3,
-    factual: 3
+    factualGrounding: 3
   });
 
   const [results, setResults] = useState<any>(null);
@@ -75,9 +80,6 @@ export default function ManualEvaluation() {
     );
   };
 
-  const calculateMetrics = async () => {
-    if (!formData.question.trim() || !formData.answer.trim()) {
-      toast.error("Please provide both question and answer");
   const calculateMetrics = async () => {
     if (!formData.question.trim() || !formData.answer.trim()) {
       toast.error("Please provide both question and answer");

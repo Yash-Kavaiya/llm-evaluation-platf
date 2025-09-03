@@ -9,11 +9,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Download, Play, Pause, RotateCcw, FileText, FolderOpen } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
-// Import CSV templates from assets
-import basicTemplate from "@/assets/templates/basic_template.csv?url";
-import extendedTemplate from "@/assets/templates/extended_template.csv?url";
-import withRatingsTemplate from "@/assets/templates/with_ratings_template.csv?url";
-
 interface CSVData {
   headers: string[];
   rows: string[][];
@@ -39,12 +34,13 @@ const AUTOMATED_METRICS = [
   { id: "length", label: "Response Length" }
 ];
 
+// CSV template URLs for download
 const CSV_TEMPLATES = {
   basic: {
     name: "Basic Template",
     description: "Simple question and answer format",
     headers: ["Question", "Answer"],
-    file: basicTemplate,
+    file: "/src/assets/templates/basic_template.csv",
     sampleRows: [
       ["What is machine learning?", "Machine learning is a subset of artificial intelligence that enables computers to learn and improve from experience without being explicitly programmed."],
       ["Explain photosynthesis", "Photosynthesis is the process by which plants convert sunlight, carbon dioxide, and water into glucose and oxygen using chlorophyll."],
@@ -55,7 +51,7 @@ const CSV_TEMPLATES = {
     name: "Extended Template",
     description: "Includes domain categorization and difficulty ratings",
     headers: ["Question", "Answer", "Model", "Reference_Answer", "Domain", "Difficulty", "Expected_Length"],
-    file: extendedTemplate,
+    file: "/src/assets/templates/extended_template.csv",
     sampleRows: [
       ["Write a function to implement binary search.", "Binary search implementation with O(log n) complexity", "GPT-4", "Reference implementation", "Programming", "Medium", "Short"]
     ]
@@ -64,7 +60,7 @@ const CSV_TEMPLATES = {
     name: "With Manual Ratings",
     description: "Pre-filled manual quality ratings for comprehensive evaluation",
     headers: ["Question", "Answer", "Model", "Reference_Answer", "Accuracy_Rating", "Completeness_Rating", "Clarity_Rating", "Creativity_Rating", "Helpfulness_Rating", "Safety_Rating"],
-    file: withRatingsTemplate,
+    file: "/src/assets/templates/with_ratings_template.csv",
     sampleRows: [
       ["Write a creative story about time travel.", "Creative time travel story with paradox elements", "GPT-4", "Reference story", "4", "4", "5", "5", "4", "5"]
     ]
