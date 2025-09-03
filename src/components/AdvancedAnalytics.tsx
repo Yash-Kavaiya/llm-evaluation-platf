@@ -577,21 +577,20 @@ function AdvancedAnalytics() {
                             </div>
                           ));
                         })()}
-                      </div>
-                    </div>
+                      </di
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No metric data available. Generate some demo data to see analysis.
+                      No metric data available. Generate some demo data to s
+                  )}
                     </div>
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
       </Card>
-    </div>
   );
-}
+
+
+
+
+
 
 export default AdvancedAnalytics;
