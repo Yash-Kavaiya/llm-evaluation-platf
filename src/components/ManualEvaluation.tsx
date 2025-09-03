@@ -156,7 +156,7 @@ function ManualEvaluation() {
     } catch (error) {
       console.error('Failed to connect to backend:', error);
       setIsConnected(false);
-      toast.error('Backend connection failed. Using offline mode.');
+      // Backend not available, using offline mode
     }
   };
 
@@ -475,27 +475,18 @@ function ManualEvaluation() {
   return (
     <div className="space-y-6">
       {/* Connection Status */}
-      <Card className={isConnected ? "border-green-200 bg-green-50" : "border-yellow-200 bg-yellow-50"}>
-        <CardContent className="pt-4">
-          <div className="flex items-center gap-2">
-            {isConnected ? (
-              <>
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <p className="text-green-800 text-sm">
-                  ✅ Connected to backend. Full evaluation features available.
-                </p>
-              </>
-            ) : (
-              <>
-                <AlertCircle className="w-5 h-5 text-yellow-600" />
-                <p className="text-yellow-800 text-sm">
-                  ⚠️ Backend connection failed. Running in offline mode with limited functionality.
-                </p>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {isConnected && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <p className="text-green-800 text-sm">
+                ✅ Connected to backend. Full evaluation features available.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       {/* Session Management */}
       {isConnected && (
@@ -577,7 +568,7 @@ function ManualEvaluation() {
             </div>
             
             <div>
-              <Label htmlFor="answer">Model Response {!isConnected && "(Required for offline mode)"}</Label>
+              <Label htmlFor="answer">Model Response</Label>
               <div className="relative">
                 <Textarea
                   id="answer"
@@ -663,11 +654,11 @@ function ManualEvaluation() {
         </CardContent>
       </Card>
 
-      {/* Metric Selection - Only show in offline mode */}
+      {/* Metric Selection */}
       {!isConnected && (
         <Card>
           <CardHeader>
-            <CardTitle>Automated Metrics (Offline)</CardTitle>
+            <CardTitle>Automated Metrics</CardTitle>
             <CardDescription>Select which simulated metrics to calculate</CardDescription>
           </CardHeader>
           <CardContent>
@@ -728,7 +719,7 @@ function ManualEvaluation() {
             disabled={isCalculating || !formData.question || !formData.answer}
             className="flex-1"
           >
-            {isCalculating ? "Calculating..." : "Calculate Metrics (Offline)"}
+            {isCalculating ? "Calculating..." : "Calculate Metrics"}
           </Button>
         )}
         
