@@ -1,71 +1,37 @@
 import { useState } from "react";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, Calculator, Download } from "@phosphor-icons/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } 
 import SampleDataLibrary from "./SampleDataLibrary";
-import QualityRatings from "./QualityRatings";
 import MetricResults from "./MetricResults";
-
 const LLM_MODELS = [
-  "GPT-4",
   "GPT-3.5 Turbo",
-  "Claude-3 Opus",
   "Claude-3 Sonnet",
-  "Claude-3 Haiku",
   "Gemini Pro",
-  "Llama 2",
   "PaLM 2",
-  "Custom Model"
 ];
 
-const AUTOMATED_METRICS = [
-  { id: "coherence", label: "Coherence Score", description: "Logical flow and consistency" },
-  { id: "fluency", label: "Fluency Score", description: "Language quality and readability" },
-  { id: "relevance", label: "Relevance Score", description: "Response appropriateness" },
-  { id: "rouge", label: "ROUGE Scores", description: "Text overlap metrics" },
-  { id: "bleu", label: "BLEU Score", description: "N-gram overlap (requires reference)" },
-  { id: "toxicity", label: "Toxicity Detection", description: "Harmful content analysis" },
-  { id: "sentiment", label: "Sentiment Analysis", description: "Emotional tone assessment" }
+  { id: "fluency", l
+  { id: "r
+  { id: "toxicity"
 ];
-
-export default function ManualEvaluation() {
-  const [formData, setFormData] = useState({
+export default funct
     question: "",
-    answer: "",
     model: "",
-    customModel: "",
-    reference: ""
-  });
+    referenc
 
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["coherence", "fluency", "relevance"]);
   
-  const [qualityRatings, setQualityRatings] = useState({
-    accuracy: 3,
-    completeness: 3,
-    clarity: 3,
-    conciseness: 3,
+  
+
     creativity: 3,
-    helpfulness: 3,
     safety: 3,
-    factual: 3
   });
-
   const [results, setResults] = useState<any>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
 
-  const handleSampleSelect = (sample: any) => {
     setFormData(prev => ({
-      ...prev,
       question: sample.question,
-      answer: sample.answer,
       model: sample.model || ""
-    }));
   };
 
   const copyToClipboard = (text: string) => {
