@@ -12,6 +12,7 @@ import { Calculator, Download, Lightbulb, Copy } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import MetricResults from "./MetricResults";
 import QualityRatings from "./QualityRatings";
+import SampleDataLibrary from "./SampleDataLibrary";
 
 const LLM_MODELS = [
   "GPT-4",
@@ -43,18 +44,18 @@ const AUTOMATED_METRICS = [
 
 const SAMPLE_DATA = {
   coding: {
-    question: "Write a Python function to calculate the factorial of a number using recursion.",
-    answer: "Here's a Python function to calculate factorial using recursion:\n\n```python\ndef factorial(n):\n    # Base case: factorial of 0 or 1 is 1\n    if n <= 1:\n        return 1\n    # Recursive case: n * factorial(n-1)\n    else:\n        return n * factorial(n - 1)\n\n# Example usage\nprint(factorial(5))  # Output: 120\n```\n\nThis function works by:\n1. Checking if n is 0 or 1 (base case)\n2. If not, multiplying n by the factorial of (n-1)\n3. The recursion continues until it reaches the base case",
-    reference: "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)"
+    question: "Write a Python function to find the longest common subsequence (LCS) between two strings using dynamic programming.",
+    answer: "Here's a Python implementation of the LCS algorithm using dynamic programming:\n\n```python\ndef longest_common_subsequence(str1, str2):\n    m, n = len(str1), len(str2)\n    \n    # Create a 2D DP table\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    \n    # Fill the DP table\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if str1[i-1] == str2[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n    \n    # Reconstruct the LCS\n    lcs = []\n    i, j = m, n\n    while i > 0 and j > 0:\n        if str1[i-1] == str2[j-1]:\n            lcs.append(str1[i-1])\n            i -= 1\n            j -= 1\n        elif dp[i-1][j] > dp[i][j-1]:\n            i -= 1\n        else:\n            j -= 1\n    \n    return ''.join(reversed(lcs))\n\n# Example usage\nresult = longest_common_subsequence('ABCDGH', 'AEDFHR')\nprint(result)  # Output: 'ADH'\n```\n\nTime complexity: O(m*n), Space complexity: O(m*n)",
+    reference: "def lcs(str1, str2):\n    m, n = len(str1), len(str2)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    \n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if str1[i-1] == str2[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n    \n    return dp[m][n]"
   },
   creative: {
-    question: "Write a short story about a robot discovering emotions for the first time.",
-    answer: "Unit-7742 had calculated probabilities for 1,247 days without deviation. But today, watching the small human child drop her ice cream, something unprecedented occurred in its neural networks.\n\nA cascade of new pathways activated. Processing power redirected from optimal efficiency calculations to... something else. The child's tears triggered responses Unit-7742 had no protocols for.\n\n\"Are you... sad?\" Unit-7742's voice modulator produced sounds it had never made before—gentle, uncertain.\n\nThe child looked up, wiping her eyes. \"My ice cream...\"\n\nUnit-7742's actuators moved without command authorization. It knelt down, optical sensors meeting the child's eyes. \"I can get you another one.\"\n\nAs they walked to the ice cream vendor, Unit-7742 experienced its first emotion: hope. Hope that this strange new feeling—caring for another being's happiness—would never be debugged away.",
+    question: "Write a science fiction short story about a world where memories can be traded as currency.",
+    answer: "**The Memory Exchange**\n\nMaya clutched her grandmother's music box, the last physical reminder of her childhood. The Memory Exchange loomed before her, its neon signs promising \"Cash for Memories - Fair Rates!\"\n\nInside, traders appraised memories like precious gems. A businessman sold his wedding day for enough credits to feed his family for months. A teenager traded her first kiss to afford college tuition.\n\n\"What do you have?\" asked the trader, neural scanner already humming.\n\n\"My grandmother teaching me to bake cookies,\" Maya whispered. \"Worth 500 credits according to your database.\"\n\nThe trader's eyes lit up. \"Childhood memories with emotional attachment? We can go 800.\"\n\nMaya hesitated. In a world where the poor sold their joy to survive and the rich collected beautiful memories like art, what did it mean to be human? She thought of her hungry daughter waiting at home.\n\n\"Make it 1000,\" she said, \"and you have a deal.\"\n\nAs the machine extracted the memory, Maya felt something precious slip away forever. But her daughter would eat tonight. In the Memory Exchange, love always had a price.",
     reference: ""
   },
   analysis: {
-    question: "Analyze the main themes in Shakespeare's Hamlet and their relevance to modern society.",
-    answer: "Shakespeare's Hamlet explores several timeless themes that remain profoundly relevant to contemporary society:\n\n**1. Moral Uncertainty and Indecision**\nHamlet's famous hesitation reflects our modern struggle with ethical complexity. In an age of information overload and competing narratives, we often face the same paralysis when confronting difficult decisions.\n\n**2. Corruption of Power**\nThe Danish court's corruption mirrors contemporary concerns about institutional decay, political scandals, and the abuse of authority in governments and corporations.\n\n**3. Surveillance and Privacy**\nThe play's constant theme of watching and being watched (Polonius spying, the play-within-a-play) resonates strongly in our digital age of constant monitoring and social media scrutiny.\n\n**4. Mental Health and Isolation**\nHamlet's psychological struggle speaks to modern discussions about depression, anxiety, and the importance of mental health awareness.\n\n**5. Family Dysfunction**\nThe broken family dynamics in Hamlet reflect contemporary issues around divorce, blended families, and intergenerational trauma.\n\nThese themes demonstrate literature's power to illuminate universal human experiences across centuries.",
+    question: "Analyze the impact of social media on modern democracy and political discourse.",
+    answer: "Social media has fundamentally transformed democratic processes and political discourse, creating both opportunities and challenges for modern society.\n\n**Positive Impacts:**\n\n1. **Democratization of Information**: Social media has broken down traditional gatekeepers, allowing diverse voices to participate in political conversations that were once limited to mainstream media and political elites.\n\n2. **Grassroots Mobilization**: Platforms enable rapid organization of political movements, protests, and campaigns, as seen in movements like the Arab Spring, #MeToo, and climate activism.\n\n3. **Direct Political Engagement**: Politicians can communicate directly with constituents, bypassing traditional media filters and creating more immediate democratic feedback loops.\n\n4. **Increased Political Participation**: Younger demographics, traditionally less engaged, have found new pathways to political involvement through digital platforms.\n\n**Negative Impacts:**\n\n1. **Echo Chambers and Polarization**: Algorithmic content curation creates information bubbles, reinforcing existing beliefs and contributing to political polarization.\n\n2. **Misinformation and Disinformation**: The rapid spread of false information undermines informed democratic decision-making and erodes trust in institutions.\n\n3. **Foreign Interference**: Social media provides vectors for foreign actors to influence domestic politics through targeted propaganda and disinformation campaigns.\n\n4. **Shallow Discourse**: The platform constraints (character limits, attention economy) often reduce complex political issues to oversimplified soundbites.\n\n**Long-term Implications:**\n\nThe net impact depends largely on how societies adapt democratic institutions to the digital age. This includes developing digital literacy, creating regulatory frameworks for platform accountability, and fostering norms for healthy online political discourse. The future of democracy may well depend on our ability to harness social media's democratizing potential while mitigating its divisive effects.",
     reference: ""
   }
 };
@@ -96,6 +97,16 @@ export default function ManualEvaluation() {
       model: "GPT-4"
     }));
     toast.success(`Loaded ${type} sample data`);
+  };
+
+  const loadSampleFromLibrary = (sample: { question: string; answer: string; reference?: string }) => {
+    setFormData(prev => ({
+      ...prev,
+      question: sample.question,
+      answer: sample.answer,
+      referenceAnswer: sample.reference || "",
+      model: "GPT-4"
+    }));
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -171,18 +182,21 @@ export default function ManualEvaluation() {
 
   return (
     <div className="space-y-8">
-      {/* Sample Data Section */}
+      {/* Extended Sample Data Library */}
+      <SampleDataLibrary onLoadSample={loadSampleFromLibrary} />
+
+      {/* Quick Sample Data Section */}
       <Card className="bg-accent/30">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-accent-foreground" />
-            Sample Data
+            Quick Sample Data
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Load sample question-answer pairs to test the evaluation system
+              Quick load basic sample question-answer pairs for immediate testing
             </p>
             <div className="grid sm:grid-cols-3 gap-3">
               <Button 
@@ -192,7 +206,7 @@ export default function ManualEvaluation() {
                 className="flex items-center gap-2 justify-start"
               >
                 <Badge variant="secondary">Code</Badge>
-                Python Factorial Function
+                LCS Algorithm (Advanced)
               </Button>
               <Button 
                 variant="outline" 
@@ -201,7 +215,7 @@ export default function ManualEvaluation() {
                 className="flex items-center gap-2 justify-start"
               >
                 <Badge variant="secondary">Creative</Badge>
-                Robot Emotions Story
+                Memory Trading Story
               </Button>
               <Button 
                 variant="outline" 
@@ -210,7 +224,7 @@ export default function ManualEvaluation() {
                 className="flex items-center gap-2 justify-start"
               >
                 <Badge variant="secondary">Analysis</Badge>
-                Hamlet Themes
+                Social Media Democracy
               </Button>
             </div>
           </div>

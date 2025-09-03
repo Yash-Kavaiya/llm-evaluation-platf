@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartBar, Upload } from "@phosphor-icons/react";
+import { ChartBar, Upload, Function as FunctionIcon } from "@phosphor-icons/react";
 import { Toaster } from "@/components/ui/sonner";
 import ManualEvaluation from "@/components/ManualEvaluation";
 import BulkEvaluation from "@/components/BulkEvaluation";
+import CustomMetricBuilder from "@/components/CustomMetricBuilder";
 
 function App() {
   const [activeTab, setActiveTab] = useState("manual");
@@ -27,7 +28,7 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="manual" className="flex items-center gap-2">
               <ChartBar className="w-4 h-4" />
               Manual Evaluation
@@ -35,6 +36,10 @@ function App() {
             <TabsTrigger value="bulk" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Bulk Processing
+            </TabsTrigger>
+            <TabsTrigger value="custom" className="flex items-center gap-2">
+              <FunctionIcon className="w-4 h-4" />
+              Custom Metrics
             </TabsTrigger>
           </TabsList>
 
@@ -62,6 +67,20 @@ function App() {
               </CardHeader>
               <CardContent>
                 <BulkEvaluation />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="custom" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Custom Metric Builder</CardTitle>
+                <CardDescription>
+                  Create domain-specific evaluation metrics with custom formulas and mathematical expressions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CustomMetricBuilder />
               </CardContent>
             </Card>
           </TabsContent>

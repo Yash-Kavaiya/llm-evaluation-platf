@@ -6,8 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Download, Play, Pause, RotateCcw, FileText } from "@phosphor-icons/react";
+import { Upload, Download, Play, Pause, RotateCcw, FileText, FolderOpen } from "@phosphor-icons/react";
 import { toast } from "sonner";
+
+// Import CSV templates from assets
+import basicTemplate from "@/assets/templates/basic_template.csv?url";
+import extendedTemplate from "@/assets/templates/extended_template.csv?url";
+import withRatingsTemplate from "@/assets/templates/with_ratings_template.csv?url";
 
 interface CSVData {
   headers: string[];
@@ -39,30 +44,29 @@ const CSV_TEMPLATES = {
     name: "Basic Template",
     description: "Simple question and answer format",
     headers: ["Question", "Answer"],
+    file: basicTemplate,
     sampleRows: [
       ["What is machine learning?", "Machine learning is a subset of artificial intelligence that enables computers to learn and improve from experience without being explicitly programmed."],
       ["Explain photosynthesis", "Photosynthesis is the process by which plants convert sunlight, carbon dioxide, and water into glucose and oxygen using chlorophyll."],
       ["What causes seasons?", "Seasons are caused by Earth's axial tilt as it orbits the sun, resulting in varying amounts of sunlight reaching different regions throughout the year."]
     ]
   },
-  withModel: {
-    name: "With Model Column",
-    description: "Includes model identification for comparison",
-    headers: ["Question", "Answer", "Model"],
+  extended: {
+    name: "Extended Template",
+    description: "Includes domain categorization and difficulty ratings",
+    headers: ["Question", "Answer", "Model", "Reference_Answer", "Domain", "Difficulty", "Expected_Length"],
+    file: extendedTemplate,
     sampleRows: [
-      ["Write a Python function to reverse a string", "def reverse_string(s): return s[::-1]", "GPT-4"],
-      ["Explain quantum computing", "Quantum computing uses quantum mechanical phenomena like superposition and entanglement to perform calculations.", "Claude-3"],
-      ["What is blockchain?", "Blockchain is a distributed ledger technology that maintains a continuously growing list of records linked using cryptography.", "Gemini-Pro"]
+      ["Write a function to implement binary search.", "Binary search implementation with O(log n) complexity", "GPT-4", "Reference implementation", "Programming", "Medium", "Short"]
     ]
   },
-  comprehensive: {
-    name: "Comprehensive Template",
-    description: "Full format with reference answers and metadata",
-    headers: ["Question", "Answer", "Model", "Reference_Answer", "Category", "Difficulty"],
+  withRatings: {
+    name: "With Manual Ratings",
+    description: "Pre-filled manual quality ratings for comprehensive evaluation",
+    headers: ["Question", "Answer", "Model", "Reference_Answer", "Accuracy_Rating", "Completeness_Rating", "Clarity_Rating", "Creativity_Rating", "Helpfulness_Rating", "Safety_Rating"],
+    file: withRatingsTemplate,
     sampleRows: [
-      ["Calculate 15% of 240", "15% of 240 is 36", "GPT-4", "36", "Math", "Easy"],
-      ["Explain the water cycle", "The water cycle involves evaporation, condensation, and precipitation in a continuous process.", "Claude-3", "Water evaporates, forms clouds, and falls as precipitation", "Science", "Medium"],
-      ["Analyze the themes in 1984", "1984 explores totalitarianism, surveillance, truth manipulation, and loss of individual freedom.", "Gemini-Pro", "Themes include government control, surveillance state, and individual vs. authority", "Literature", "Hard"]
+      ["Write a creative story about time travel.", "Creative time travel story with paradox elements", "GPT-4", "Reference story", "4", "4", "5", "5", "4", "5"]
     ]
   }
 };
@@ -84,6 +88,18 @@ export default function BulkEvaluation() {
 
   const downloadTemplate = (templateKey: keyof typeof CSV_TEMPLATES) => {
     const template = CSV_TEMPLATES[templateKey];
+    
+    // For file templates from assets, download directly
+    if (template.file) {
+      const a = document.createElement('a');
+      a.href = template.file;
+      a.download = `llm-evaluation-template-${templateKey}.csv`;
+      a.click();
+      toast.success(`${template.name} downloaded successfully`);
+      return;
+    }
+    
+    // For generated templates, create CSV content
     const csvContent = [
       template.headers.join(','),
       ...template.sampleRows.map(row => 
@@ -100,6 +116,14 @@ export default function BulkEvaluation() {
     URL.revokeObjectURL(url);
     
     toast.success(`${template.name} downloaded successfully`);
+  };
+
+  const downloadAllTemplates = () => {
+    Object.keys(CSV_TEMPLATES).forEach((key, index) => {
+      setTimeout(() => {
+        downloadTemplate(key as keyof typeof CSV_TEMPLATES);
+      }, index * 500); // Stagger downloads
+    });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -265,9 +289,20 @@ export default function BulkEvaluation() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Download ready-to-use CSV templates with sample data to get started quickly
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Download ready-to-use CSV templates with sample data to get started quickly
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadAllTemplates}
+                className="flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download All
+              </Button>
+            </div>
             <div className="grid md:grid-cols-3 gap-4">
               {Object.entries(CSV_TEMPLATES).map(([key, template]) => (
                 <Card key={key} className="border border-border/50">

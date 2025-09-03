@@ -1,0 +1,11 @@
+Question,Answer,Model,Reference_Answer
+"Write a Python function to calculate the factorial of a number using recursion.","def factorial(n):
+    if n <= 1:
+        return 1
+    else:
+        return n * factorial(n - 1)","GPT-4","def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)"
+"Explain the concept of machine learning in simple terms.","Machine learning is like teaching a computer to recognize patterns and make decisions by showing it lots of examples, similar to how a child learns to recognize animals by looking at many pictures of different animals.","Claude-3","Machine learning is a method of teaching computers to make predictions or decisions by learning from data, without being explicitly programmed for every possible scenario."
+"What are the benefits of renewable energy?","Renewable energy offers several key benefits: 1) Environmental protection through reduced greenhouse gas emissions, 2) Economic advantages including job creation and energy independence, 3) Sustainability for future generations, 4) Reduced air pollution improving public health, 5) Long-term cost savings as technology costs decrease.","Gemini-1.5-pro","Renewable energy provides environmental benefits through reduced emissions, economic benefits through job creation and energy security, and long-term sustainability for future generations."

@@ -1,0 +1,28 @@
+Question,Answer,Model,Reference_Answer,Domain,Difficulty,Expected_Length
+"Write a function to implement binary search.","Here's a binary search implementation:
+
+def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+    return -1","GPT-4","def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1","Programming","Medium","Short"
+"Analyze the time complexity of quicksort algorithm.","Quicksort has an average time complexity of O(n log n) and worst-case complexity of O(n²). The average case occurs when the pivot divides the array roughly in half each time. The worst case happens when the pivot is always the smallest or largest element, creating unbalanced partitions.","Claude-3","Quicksort average case: O(n log n), worst case: O(n²). Best case also O(n log n). Space complexity is O(log n) average, O(n) worst case.","Computer Science","Hard","Medium"
+"Explain database normalization.","Database normalization is the process of organizing data to reduce redundancy and improve data integrity. It involves dividing large tables into smaller, related tables and defining relationships between them. The main normal forms are 1NF (atomic values), 2NF (no partial dependencies), and 3NF (no transitive dependencies).","Gemini-1.5-pro","Database normalization reduces redundancy by organizing data into related tables following normal forms (1NF, 2NF, 3NF) to eliminate insertion, update, and deletion anomalies.","Database Design","Medium","Medium"
