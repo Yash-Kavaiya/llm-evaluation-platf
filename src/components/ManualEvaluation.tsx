@@ -72,6 +72,7 @@ const METRICS = [
   { id: "toxicity", label: "Toxicity Detection", description: "Detection of harmful or offensive content" }
 ];
 
+function ManualEvaluation() {
   const { addEvaluation } = useEvaluationTracking();
   
   const [formData, setFormData] = useState({
