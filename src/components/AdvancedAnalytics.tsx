@@ -247,7 +247,7 @@ function AdvancedAnalytics() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
+            <ChartBar className="w-5 h-5" />
             Analytics Overview
           </CardTitle>
           <CardDescription>
@@ -320,7 +320,7 @@ function AdvancedAnalytics() {
                     <p className="text-sm text-muted-foreground">Average Score</p>
                     <p className="text-2xl font-bold">{summaryStats.avgScore.toFixed(1)}</p>
                   </div>
-                  <BarChart3 className="w-8 h-8 text-muted-foreground" />
+                  <ChartBar className="w-8 h-8 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
@@ -332,7 +332,7 @@ function AdvancedAnalytics() {
                     <p className="text-sm text-muted-foreground">Top Model</p>
                     <p className="text-lg font-semibold">{summaryStats.topModel || 'N/A'}</p>
                   </div>
-                  <LineChart className="w-8 h-8 text-muted-foreground" />
+                  <ChartLine className="w-8 h-8 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
@@ -578,17 +578,17 @@ function AdvancedAnalytics() {
                           ));
                         })()}
                       </div>
-                    ) : (
-                      <p className="text-muted-foreground">No metric data available. Generate some demo data to see statistics.</p>
-                    )}
-                    </div>
-              </Card>
+                  ) : (
+                    <p className="text-muted-foreground">No metric data available. Generate some demo data to see statistics.</p>
+                  )}
                 </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
   );
+}
 
-
-
-
-
-
-export default AdvancedAnalytics;
+export default AdvancedAnalytics;
