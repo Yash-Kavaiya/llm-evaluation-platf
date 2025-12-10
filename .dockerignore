@@ -1,0 +1,83 @@
+# Dependencies
+node_modules/
+.npm
+.pnpm-store
+
+# Build outputs (will be built in Docker)
+dist/
+build/
+.next/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+ENV/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+.docker/
+docker-compose*.yml
+
+# CI/CD
+.github/
+
+# Documentation
+*.md
+!README.md
+
+# Logs and databases
+*.log
+*.db
+*.sqlite
+logs/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads and exports (runtime generated)
+uploads/
+exports/
+
+# Environment files (secrets)
+.env
+.env.*
+!.env.example
+
+# Test files
+tests/
+test/
+*.test.*
+*.spec.*
+coverage/
+.coverage
+htmlcov/
+
+# Spark specific
+.spark-initial-sha
+spark.meta.json

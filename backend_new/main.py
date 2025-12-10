@@ -11,10 +11,13 @@ A comprehensive, scalable backend for LLM evaluation with support for:
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
 import uvicorn
+import os
+from pathlib import Path
 from typing import Dict, Any
 
 # Import core components
@@ -38,6 +41,9 @@ from app.routers import (
 # Setup logging
 setup_logging()
 logger = logging.getLogger(__name__)
+
+# Path to static files (built frontend)
+STATIC_DIR = Path(__file__).parent / "static"
 
 
 @asynccontextmanager
@@ -261,12 +267,35 @@ async def api_info():
     }
 
 
+# Mount static files for production (built frontend)
+if STATIC_DIR.exists():
+    # Mount assets directory
+    assets_dir = STATIC_DIR / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+    
+    # Serve index.html for SPA routes (must be after all API routes)
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """Serve the React SPA for all non-API routes"""
+        # Check if the file exists in static directory
+        file_path = STATIC_DIR / full_path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(str(file_path))
+        # Default to index.html for SPA routing
+        index_path = STATIC_DIR / "index.html"
+        if index_path.exists():
+            return FileResponse(str(index_path))
+        raise HTTPException(status_code=404, detail="Not found")
+
+
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host=settings.HOST,
-        port=settings.PORT,
+        port=int(os.environ.get("PORT", settings.PORT)),
         reload=settings.DEBUG,
         log_level="info" if settings.DEBUG else "warning",
         access_log=settings.DEBUG
     )
+
